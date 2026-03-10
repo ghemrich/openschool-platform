@@ -1,0 +1,46 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="Kurzusok">
+  <div class="container page">
+    <h1>Elérhető kurzusok</h1>
+    <div id="courses" class="card-grid">
+      <p>Betöltés...</p>
+    </div>
+  </div>
+
+  <script>
+    async function loadCourses() {
+      try {
+        const res = await fetch('/api/courses');
+        if (!res.ok) return;
+        const courses = await res.json();
+        const container = document.getElementById('courses');
+        if (!container) return;
+        if (courses.length === 0) {
+          container.innerHTML = '<p>Még nincsenek kurzusok.</p>';
+          return;
+        }
+        container.innerHTML = courses.map((c: any) => `
+          <div class="card">
+            <h3>${c.name}</h3>
+            <p>${c.description || ''}</p>
+            <a href="/courses/${c.id}" class="btn btn-secondary" style="margin-top:12px;">Részletek</a>
+          </div>
+        `).join('');
+      } catch {
+        container && (container.innerHTML = '<p>Kurzusok nem elérhetőek.</p>');
+      }
+    }
+    loadCourses();
+  </script>
+</Layout>
+
+<style>
+  .page {
+    padding: 40px 0;
+  }
+  .page h1 {
+    margin-bottom: 32px;
+  }
+</style>

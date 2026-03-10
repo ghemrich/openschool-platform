@@ -1,0 +1,81 @@
+---
+import Layout from '../../layouts/Layout.astro';
+export function getStaticPaths() {
+  return [{ params: { slug: 'placeholder' } }];
+}
+const { slug } = Astro.params;
+---
+<Layout title="Kurzus">
+  <div class="container page">
+    <div id="course-detail">
+      <p>Betöltés...</p>
+    </div>
+  </div>
+
+  <script>
+    const slug = window.location.pathname.split('/').filter(Boolean).pop();
+    async function loadCourse() {
+      const container = document.getElementById('course-detail');
+      if (!container) return;
+
+      const token = localStorage.getItem('access_token');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+      try {
+        const res = await fetch(`/api/courses/${slug}`, { headers });
+        if (!res.ok) {
+          container.innerHTML = '<p>Kurzus nem található.</p>';
+          return;
+        }
+        const course = await res.json();
+
+        let modulesHtml = '';
+        if (course.modules && course.modules.length > 0) {
+          modulesHtml = '<h2>Modulok</h2>' + course.modules.map(m =>
+            `<div class="card module-card">
+              <h3>${m.name}</h3>
+              <ul>${m.exercises.map(e => `<li>${e.name}</li>`).join('')}</ul>
+            </div>`
+          ).join('');
+        }
+
+        container.innerHTML = `
+          <h1>${course.name}</h1>
+          <p class="course-desc">${course.description || ''}</p>
+          <button id="enroll-btn" class="btn btn-primary" style="margin:20px 0;">Beiratkozás</button>
+          <div id="enroll-msg"></div>
+          ${modulesHtml}
+        `;
+
+        document.getElementById('enroll-btn')?.addEventListener('click', async () => {
+          const t = localStorage.getItem('access_token');
+          if (!t) { window.location.href = '/login'; return; }
+          const r = await fetch(`/api/courses/${slug}/enroll`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${t}` }
+          });
+          const msg = document.getElementById('enroll-msg');
+          if (r.status === 201) {
+            msg && (msg.innerHTML = '<p style="color:green;">Sikeresen beiratkoztál!</p>');
+          } else if (r.status === 409) {
+            msg && (msg.innerHTML = '<p>Már beiratkoztál erre a kurzusra.</p>');
+          } else {
+            msg && (msg.innerHTML = '<p style="color:red;">Hiba történt.</p>');
+          }
+        });
+      } catch {
+        container.innerHTML = '<p>Kurzus nem elérhető.</p>';
+      }
+    }
+    loadCourse();
+  </script>
+</Layout>
+
+<style>
+  .page { padding: 40px 0; }
+  .course-desc { font-size: 1.1rem; color: var(--color-text-light); margin-bottom: 16px; }
+  .module-card { margin-bottom: 16px; }
+  .module-card h3 { margin-bottom: 8px; }
+  .module-card ul { padding-left: 20px; }
+  .module-card li { margin-bottom: 4px; }
+</style>

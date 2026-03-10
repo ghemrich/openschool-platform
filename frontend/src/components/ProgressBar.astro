@@ -1,0 +1,44 @@
+---
+interface Props {
+  percent: number;
+  label?: string;
+}
+const { percent, label } = Astro.props;
+---
+<div class="progress-wrapper">
+  {label && <span class="progress-label">{label}</span>}
+  <div class="progress-bar">
+    <div class="progress-bar-fill" style={`width: ${percent}%`}></div>
+  </div>
+  <span class="progress-text">{percent}%</span>
+</div>
+
+<style>
+  .progress-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-bar {
+    flex: 1;
+    background: var(--color-border);
+    border-radius: 10px;
+    height: 20px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: var(--color-success);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s;
+  }
+  .progress-label {
+    font-weight: 500;
+    min-width: 120px;
+  }
+  .progress-text {
+    font-weight: 600;
+    min-width: 45px;
+    text-align: right;
+  }
+</style>

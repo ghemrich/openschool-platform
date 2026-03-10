@@ -28,6 +28,13 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - backend
+      - frontend
+
+  frontend:
+    build: ./frontend
+    volumes:
+      - frontend_dist:/usr/share/nginx/html
 
 volumes:
   pgdata:
+  frontend_dist:

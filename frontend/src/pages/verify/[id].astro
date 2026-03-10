@@ -1,0 +1,80 @@
+---
+import Layout from '../../layouts/Layout.astro';
+export function getStaticPaths() {
+  return [{ params: { id: 'placeholder' } }];
+}
+const { id } = Astro.params;
+---
+<Layout title="Tanúsítvány verifikáció">
+  <div class="container page">
+    <div id="verify-content" class="card verify-card">
+      <p>Ellenőrzés...</p>
+    </div>
+  </div>
+
+  <script>
+    const id = window.location.pathname.split('/').filter(Boolean).pop();
+    async function verify() {
+      const container = document.getElementById('verify-content');
+      if (!container) return;
+
+      try {
+        const res = await fetch(`/api/verify/${id}`);
+        if (res.status === 404) {
+          container.innerHTML = `
+            <h1 style="color:var(--color-accent);">Érvénytelen tanúsítvány</h1>
+            <p>Ez a tanúsítvány azonosító nem található a rendszerben.</p>
+          `;
+          return;
+        }
+        const data = await res.json();
+        container.innerHTML = `
+          <div class="valid-badge">&#10003; Érvényes</div>
+          <h1>DevSchool Tanúsítvány</h1>
+          <div class="verify-details">
+            <p><strong>Név:</strong> ${data.name}</p>
+            <p><strong>Kurzus:</strong> ${data.course}</p>
+            <p><strong>Kiállítva:</strong> ${new Date(data.issued_at).toLocaleDateString('hu-HU')}</p>
+            <p><strong>Azonosító:</strong> ${data.cert_id}</p>
+          </div>
+        `;
+      } catch {
+        container.innerHTML = '<p>Hiba történt az ellenőrzés során.</p>';
+      }
+    }
+    verify();
+  </script>
+</Layout>
+
+<style>
+  .page {
+    padding: 60px 0;
+    display: flex;
+    justify-content: center;
+  }
+  .verify-card {
+    text-align: center;
+    max-width: 500px;
+    padding: 48px;
+  }
+  .valid-badge {
+    display: inline-block;
+    background: var(--color-success);
+    color: white;
+    padding: 8px 24px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 24px;
+  }
+  .verify-card h1 {
+    margin-bottom: 24px;
+  }
+  .verify-details {
+    text-align: left;
+  }
+  .verify-details p {
+    margin-bottom: 8px;
+    font-size: 1.05rem;
+  }
+</style>

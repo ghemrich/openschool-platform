@@ -1,0 +1,24 @@
+---
+interface Props {
+  name: string;
+  description: string;
+  id: number;
+}
+const { name, description, id } = Astro.props;
+---
+<div class="card course-card">
+  <h3>{name}</h3>
+  <p>{description || 'Nincs leírás.'}</p>
+  <a href={`/courses/${id}`} class="btn btn-secondary" style="margin-top:12px;">Részletek</a>
+</div>
+
+<style>
+  .course-card h3 {
+    margin-bottom: 8px;
+    color: var(--color-primary);
+  }
+  .course-card p {
+    color: var(--color-text-light);
+    margin-bottom: 12px;
+  }
+</style>

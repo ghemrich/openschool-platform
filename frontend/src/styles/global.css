@@ -1,0 +1,105 @@
+:root {
+  --color-primary: #2c3e50;
+  --color-accent: #e74c3c;
+  --color-bg: #f8f9fa;
+  --color-text: #333;
+  --color-text-light: #7f8c8d;
+  --color-border: #dee2e6;
+  --color-white: #fff;
+  --color-success: #27ae60;
+  --max-width: 1200px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+
+.btn-primary:hover {
+  background: #c0392b;
+  color: var(--color-white);
+}
+
+.btn-secondary {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.btn-secondary:hover {
+  background: #1a252f;
+  color: var(--color-white);
+}
+
+/* Progress bar */
+.progress-bar {
+  background: var(--color-border);
+  border-radius: 10px;
+  height: 20px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background: var(--color-success);
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s;
+}
+
+/* Cards */
+.card {
+  background: var(--color-white);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 767px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}

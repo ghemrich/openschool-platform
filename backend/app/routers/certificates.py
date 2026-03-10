@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -42,9 +42,7 @@ def request_certificate(
         raise HTTPException(status_code=404, detail="Course not found")
 
     existing = (
-        db.query(Certificate)
-        .filter(Certificate.user_id == current_user.id, Certificate.course_id == course_id)
-        .first()
+        db.query(Certificate).filter(Certificate.user_id == current_user.id, Certificate.course_id == course_id).first()
     )
     if existing:
         raise HTTPException(status_code=409, detail="Már van tanúsítványod ehhez a kurzushoz")
@@ -90,11 +88,7 @@ def download_certificate_pdf(
     current_user: User = Depends(get_current_user),
 ):
     """Download the PDF for a certificate."""
-    cert = (
-        db.query(Certificate)
-        .filter(Certificate.cert_id == cert_id, Certificate.user_id == current_user.id)
-        .first()
-    )
+    cert = db.query(Certificate).filter(Certificate.cert_id == cert_id, Certificate.user_id == current_user.id).first()
     if not cert:
         raise HTTPException(status_code=404, detail="Certificate not found")
     if not cert.pdf_path or not Path(cert.pdf_path).is_file():

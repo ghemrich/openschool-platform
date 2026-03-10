@@ -43,3 +43,4 @@ build/
 
 # Verification tests (from course repo)
 tesztek/
+node_modules/

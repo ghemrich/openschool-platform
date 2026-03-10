@@ -1,0 +1,136 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>{title} | DevSchool</title>
+</head>
+<body>
+  <slot name="header">
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="/" class="logo">DevSchool</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">&#9776;</button>
+        <nav class="nav" id="nav">
+          <a href="/courses">Kurzusok</a>
+          <a href="/dashboard">Dashboard</a>
+          <span id="auth-nav"></span>
+        </nav>
+      </div>
+    </header>
+  </slot>
+
+  <main>
+    <slot />
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 DevSchool. Minden jog fenntartva.</p>
+    </div>
+  </footer>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const nav = document.getElementById('nav');
+    if (hamburger && nav) {
+      hamburger.addEventListener('click', () => {
+        nav.classList.toggle('open');
+      });
+    }
+
+    // Auth nav
+    const authNav = document.getElementById('auth-nav');
+    const token = localStorage.getItem('access_token');
+    if (authNav) {
+      if (token) {
+        authNav.innerHTML = '<a href="/dashboard">Profilom</a>';
+      } else {
+        authNav.innerHTML = '<a href="/login" class="btn btn-primary" style="padding:8px 16px;font-size:0.9rem;">Belépés</a>';
+      }
+    }
+  </script>
+</body>
+</html>
+
+<style>
+  @import '../styles/global.css';
+
+  .site-header {
+    background: var(--color-white);
+    border-bottom: 1px solid var(--color-border);
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-primary);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .nav a {
+    font-weight: 500;
+  }
+
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--color-primary);
+  }
+
+  .site-footer {
+    background: var(--color-primary);
+    color: var(--color-white);
+    text-align: center;
+    padding: 24px 0;
+    margin-top: 60px;
+  }
+
+  @media (max-width: 767px) {
+    .hamburger {
+      display: block;
+    }
+
+    .nav {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      right: 0;
+      background: var(--color-white);
+      padding: 20px;
+      border-bottom: 1px solid var(--color-border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .nav.open {
+      display: flex;
+    }
+  }
+</style>

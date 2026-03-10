@@ -1,0 +1,151 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Főoldal">
+  <section class="hero">
+    <div class="container">
+      <h1>Tanulj programozni, építs projekteket</h1>
+      <p class="hero-sub">A DevSchool egy nyílt forráskódú tanulóplatform, ahol valódi projekteken keresztül sajátíthatod el a programozást.</p>
+      <a href="/courses" class="btn btn-primary">Kurzusok böngészése</a>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="container">
+      <h2>Hogyan működik?</h2>
+      <div class="steps">
+        <div class="step card">
+          <div class="step-number">1</div>
+          <h3>Beiratkozás</h3>
+          <p>Válassz egy kurzust és iratkozz be GitHub fiókoddal. Teljesen ingyenes.</p>
+        </div>
+        <div class="step card">
+          <div class="step-number">2</div>
+          <h3>Feladatok</h3>
+          <p>Dolgozz végig a modulokon. Minden feladatot GitHub-on oldasz meg, a rendszer automatikusan ellenőrzi.</p>
+        </div>
+        <div class="step card">
+          <div class="step-number">3</div>
+          <h3>Tanúsítvány</h3>
+          <p>Ha minden kötelező feladatot megoldottál, automatikus tanúsítványt kapsz QR kóddal.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="courses-preview">
+    <div class="container">
+      <h2>Elérhető kurzusok</h2>
+      <div id="course-list" class="card-grid">
+        <p>Kurzusok betöltése...</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    async function loadCourses() {
+      try {
+        const res = await fetch('/api/courses');
+        if (!res.ok) return;
+        const courses = await res.json();
+        const container = document.getElementById('course-list');
+        if (!container) return;
+        if (courses.length === 0) {
+          container.innerHTML = '<p>Még nincsenek kurzusok.</p>';
+          return;
+        }
+        container.innerHTML = courses.map((c: any) => `
+          <div class="card course-card">
+            <h3>${c.name}</h3>
+            <p>${c.description || 'Nincs leírás.'}</p>
+            <a href="/courses/${c.id}" class="btn btn-secondary" style="margin-top:12px;">Részletek</a>
+          </div>
+        `).join('');
+      } catch {
+        // API not available in static build
+      }
+    }
+    loadCourses();
+  </script>
+</Layout>
+
+<style>
+  .hero {
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: 80px 0;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 32px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .how-it-works {
+    padding: 60px 0;
+  }
+
+  .how-it-works h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2rem;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .step {
+    text-align: center;
+  }
+
+  .step-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-white);
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .step h3 {
+    margin-bottom: 8px;
+  }
+
+  .courses-preview {
+    padding: 0 0 60px;
+  }
+
+  .courses-preview h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2rem;
+  }
+
+  @media (max-width: 767px) {
+    .hero h1 {
+      font-size: 1.8rem;
+    }
+
+    .steps {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

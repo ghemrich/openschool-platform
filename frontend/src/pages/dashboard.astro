@@ -1,0 +1,102 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Dashboard">
+  <div class="container page">
+    <h1>Dashboard</h1>
+    <div id="dashboard-content">
+      <p>Betöltés...</p>
+    </div>
+  </div>
+
+  <script>
+    async function loadDashboard() {
+      const container = document.getElementById('dashboard-content');
+      if (!container) return;
+
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      try {
+        const [dashRes, certRes] = await Promise.all([
+          fetch('/api/me/dashboard', { headers }),
+          fetch('/api/me/certificates', { headers })
+        ]);
+
+        if (dashRes.status === 401 || dashRes.status === 403) {
+          localStorage.removeItem('access_token');
+          window.location.href = '/login';
+          return;
+        }
+
+        const courses = await dashRes.json();
+        const certs = certRes.ok ? await certRes.json() : [];
+
+        if (courses.length === 0) {
+          container.innerHTML = `
+            <p>Még nem iratkoztál be semmilyen kurzusra.</p>
+            <a href="/courses" class="btn btn-primary" style="margin-top:16px;">Kurzusok böngészése</a>
+          `;
+          return;
+        }
+
+        const certMap = {};
+        certs.forEach((c) => { certMap[c.course_id] = c; });
+
+        container.innerHTML = courses.map((c) => {
+          const cert = certMap[c.course_id];
+          const isComplete = c.progress_percent >= 100;
+
+          let certHtml = '';
+          if (cert) {
+            certHtml = `<a href="/api/me/certificates/${cert.cert_id}/pdf" class="btn btn-secondary" style="margin-top:8px;">PDF letöltése</a>`;
+          } else if (isComplete) {
+            certHtml = `<button class="btn btn-primary request-cert" data-course-id="${c.course_id}" style="margin-top:8px;">Tanúsítvány igénylése</button>`;
+          }
+
+          return `
+            <div class="card" style="margin-bottom:16px;">
+              <h3>${c.course_name}</h3>
+              <div class="progress-wrapper">
+                <div class="progress-bar" style="flex:1;background:#dee2e6;border-radius:10px;height:20px;overflow:hidden;">
+                  <div style="background:#27ae60;height:100%;border-radius:10px;width:${c.progress_percent}%;"></div>
+                </div>
+                <span style="font-weight:600;margin-left:12px;">${c.completed_exercises}/${c.total_exercises} — ${c.progress_percent}%</span>
+              </div>
+              ${certHtml}
+            </div>
+          `;
+        }).join('');
+
+        document.querySelectorAll('.request-cert').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const courseId = (e.target).dataset.courseId;
+            const r = await fetch(`/api/me/courses/${courseId}/certificate`, {
+              method: 'POST',
+              headers
+            });
+            if (r.status === 201) {
+              window.location.reload();
+            } else {
+              const d = await r.json();
+              alert(d.detail || 'Hiba történt.');
+            }
+          });
+        });
+      } catch {
+        container.innerHTML = '<p>Hiba történt a betöltés során.</p>';
+      }
+    }
+    loadDashboard();
+  </script>
+</Layout>
+
+<style>
+  .page { padding: 40px 0; }
+  .page h1 { margin-bottom: 32px; }
+</style>

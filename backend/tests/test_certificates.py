@@ -1,4 +1,9 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from app.auth.jwt import create_access_token
 from app.database import Base, get_db
@@ -6,11 +11,6 @@ from app.main import app
 from app.models.certificate import Certificate
 from app.models.course import Course, Enrollment, Exercise, Module, Progress, ProgressStatus
 from app.models.user import User, UserRole
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-import pytest
 
 SQLALCHEMY_TEST_URL = "sqlite:///./test_certificates.db"
 engine = create_engine(SQLALCHEMY_TEST_URL, connect_args={"check_same_thread": False})
