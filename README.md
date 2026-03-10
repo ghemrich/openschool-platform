@@ -98,6 +98,16 @@ openschool-platform/
 
 Szívesen fogadjuk a hozzájárulásokat! Olvasd el a [CONTRIBUTING.md](CONTRIBUTING.md) fájlt a részletekért.
 
+## Dokumentáció
+
+| Dokumentum | Leírás |
+|---|---|
+| [Architektúra](docs/architektura.md) | Rendszer felépítés, adatmodell, auth folyamat, API struktúra |
+| [Telepítési útmutató](docs/telepitesi-utmutato.md) | Helyi fejlesztés, staging, éles VPS telepítés, SSL, backup |
+| [Fejlesztői környezet](docs/fejlesztoi-kornyezet.md) | Python venv, VS Code, pre-commit, Ruff, pytest, Docker |
+| [Jövőkép és fejlesztési terv](docs/jovokep-es-fejlesztesi-terv.md) | Kurzusok, megvalósított funkciók, roadmap |
+| [Hozzájárulás](CONTRIBUTING.md) | Fork, branch stratégia, PR küldés, kódstílus |
+
 A `good first issue` címkéjű [issue-k](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) ideálisak kezdőknek.
 
 ## Licensz
