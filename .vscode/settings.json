@@ -1,0 +1,34 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["backend/tests"],
+
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+
+  "[astro]": {
+    "editor.defaultFormatter": "astro-build.astro-vscode"
+  },
+
+  "editor.rulers": [120],
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/pgdata": true,
+    "**/*.pyc": true
+  },
+  "search.exclude": {
+    "**/pgdata": true,
+    "**/node_modules": true,
+    "**/.venv": true,
+    "**/dist": true
+  }
+}

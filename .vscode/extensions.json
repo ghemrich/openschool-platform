@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "charliermarsh.ruff",
+    "ms-python.python",
+    "ms-python.debugpy",
+    "astro-build.astro-vscode",
+    "editorconfig.editorconfig",
+    "ms-azuretools.vscode-docker",
+    "github.copilot",
+    "eamodio.gitlens"
+  ]
+}
