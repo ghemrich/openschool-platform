@@ -1,6 +1,10 @@
 # OpenSchool Platform
 
-Online tanulási platform, amely kurzusokat kínál, követi a diákok haladását, és tanúsítványt állít ki.
+Nyílt forráskódú oktatási platform, ahol a diákok valódi fejlesztői eszközökkel tanulnak programozni.
+
+> **Az open source nem feature — az open source a tanterv.**
+
+Nem csak a szoftver nyílt: a tananyag, az eszközök, az értékelés, a platform kódja — minden látható, minden módosítható. A diák nem fekete dobozzal dolgozik. A tanár nem zárt rendszert kap. Aki tanul, az hozzá is járulhat. Aki tanít, az formálhatja is.
 
 ## Tech Stack
 
