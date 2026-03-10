@@ -7,7 +7,7 @@ from app.models.user import User
 from app.services.github import check_exercise_status
 
 
-async def update_progress_for_user(db: Session, user: User, github_token: str, owner: str = "devschool-org"):
+async def update_progress_for_user(db: Session, user: User, github_token: str, owner: str = "openschool-org"):
     """Check GitHub CI status for all enrolled exercises and update progress."""
     enrollments = db.query(Enrollment).filter(Enrollment.user_id == user.id).all()
 

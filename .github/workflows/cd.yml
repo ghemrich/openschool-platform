@@ -16,7 +16,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /opt/devschool
+            cd /opt/openschool
             git pull origin ${{ github.ref_name }}
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up --build -d

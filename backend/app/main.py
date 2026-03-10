@@ -7,7 +7,7 @@ from app.routers import admin, auth, certificates, courses, dashboard, webhooks
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="DevSchool API")
+app = FastAPI(title="OpenSchool API")
 app.include_router(auth.router)
 app.include_router(courses.router)
 app.include_router(dashboard.router)

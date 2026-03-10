@@ -1,4 +1,4 @@
-# DevSchool Platform — Telepítési útmutató
+# OpenSchool Platform — Telepítési útmutató
 
 Ez az útmutató a helyi fejlesztést, a staging és az éles (production) üzembe helyezést ismerteti.
 
@@ -38,8 +38,8 @@ A leggyorsabb módja a teljes rendszer elindításának:
 
 ```bash
 # Repó klónozása
-git clone git@github.com:ghemrich/devschool-platform.git
-cd devschool-platform
+git clone git@github.com:ghemrich/openschool-platform.git
+cd openschool-platform
 
 # Környezeti fájl létrehozása
 cp .env.example .env
@@ -93,7 +93,7 @@ source .venv/bin/activate  # Linux/macOS
 pip install -r requirements.txt
 
 # Környezeti változók beállítása (vagy .env fájl a backend/ könyvtárban)
-export DATABASE_URL="postgresql://devschool:devschool@localhost:5432/devschool"
+export DATABASE_URL="postgresql://openschool:openschool@localhost:5432/openschool"
 export SECRET_KEY="change-me-in-production"
 export BASE_URL="http://localhost"
 
@@ -121,10 +121,10 @@ Hozz létre egy `.env` fájlt a projekt gyökérkönyvtárában (soha ne commito
 
 ```bash
 # Adatbázis
-DB_USER=devschool
-DB_PASSWORD=devschool
-DB_NAME=devschool
-DATABASE_URL=postgresql://devschool:devschool@db:5432/devschool
+DB_USER=openschool
+DB_PASSWORD=openschool
+DB_NAME=openschool
+DATABASE_URL=postgresql://openschool:openschool@db:5432/openschool
 
 # Biztonság
 SECRET_KEY=change-me-in-production    # JWT aláíró kulcs — élesben random 64 karakteres stringet használj
@@ -185,7 +185,7 @@ docker compose exec backend alembic upgrade head
 1. Nyisd meg a [GitHub Developer Settings](https://github.com/settings/developers) oldalt
 2. Kattints a **New OAuth App** gombra
 3. Töltsd ki:
-   - **Application name:** `DevSchool` (vagy bármilyen név)
+   - **Application name:** `OpenSchool` (vagy bármilyen név)
    - **Homepage URL:** `http://localhost` (vagy az éles domain)
    - **Authorization callback URL:** `http://localhost/api/auth/callback`
 4. Kattints a **Register application** gombra
@@ -225,14 +225,14 @@ Staging környezethez (pl. `staging.yourdomain.com`):
 
 1. Hozz létre `.env.staging` fájlt a szerveren:
    ```bash
-   DATABASE_URL=postgresql://devschool:EROS_JELSZO@db:5432/devschool
+   DATABASE_URL=postgresql://openschool:EROS_JELSZO@db:5432/openschool
    SECRET_KEY=random-64-karakteres-string-staginghez
    BASE_URL=https://staging.yourdomain.com
    GITHUB_CLIENT_ID=staging_client_id
    GITHUB_CLIENT_SECRET=staging_client_secret
-   DB_USER=devschool
+   DB_USER=openschool
    DB_PASSWORD=EROS_JELSZO
-   DB_NAME=devschool
+   DB_NAME=openschool
    ```
 
 2. Telepítés a production compose fájllal:
@@ -259,15 +259,15 @@ sudo usermod -aG docker $USER
 sudo apt-get install docker-compose-plugin
 
 # Projekt könyvtár létrehozása
-sudo mkdir -p /opt/devschool
-sudo chown $USER:$USER /opt/devschool
-cd /opt/devschool
+sudo mkdir -p /opt/openschool
+sudo chown $USER:$USER /opt/openschool
+cd /opt/openschool
 ```
 
 ### 2. Klónozás és konfigurálás
 
 ```bash
-git clone git@github.com:ghemrich/devschool-platform.git .
+git clone git@github.com:ghemrich/openschool-platform.git .
 
 # Éles környezeti fájl létrehozása
 cp .env.example .env
@@ -277,14 +277,14 @@ nano .env
 Éles értékek beállítása:
 
 ```bash
-DATABASE_URL=postgresql://devschool:NAGYON_EROS_JELSZO@db:5432/devschool
+DATABASE_URL=postgresql://openschool:NAGYON_EROS_JELSZO@db:5432/openschool
 SECRET_KEY=$(openssl rand -hex 32)
 BASE_URL=https://yourdomain.com
 GITHUB_CLIENT_ID=production_client_id
 GITHUB_CLIENT_SECRET=production_client_secret
-DB_USER=devschool
+DB_USER=openschool
 DB_PASSWORD=NAGYON_EROS_JELSZO
-DB_NAME=devschool
+DB_NAME=openschool
 ```
 
 ### 3. DNS konfiguráció
@@ -313,11 +313,11 @@ curl http://localhost/health
 ### 5. Kezdeti adatok betöltése (opcionális)
 
 ```bash
-docker compose exec db psql -U devschool -d devschool <<'SQL'
+docker compose exec db psql -U openschool -d openschool <<'SQL'
 INSERT INTO courses (name, description) VALUES
   ('Python Alapok', '13 hetes bevezető kurzus a Python programozásba.'),
   ('Backend FastAPI', '25 hetes backend fejlesztő kurzus FastAPI keretrendszerrel.'),
-  ('Projekt Labor', 'A DevSchool platform felépítése az alapoktól az éles üzemig.');
+  ('Projekt Labor', 'A OpenSchool platform felépítése az alapoktól az éles üzemig.');
 SQL
 ```
 
@@ -381,7 +381,7 @@ Ha automatikus SSL-t szeretnél, fontold meg az nginx cseréjét [Caddy](https:/
 sudo certbot renew --dry-run
 
 # Cron job hozzáadása az automatikus megújításhoz
-echo "0 3 * * * certbot renew --quiet && docker compose -f /opt/devschool/docker-compose.prod.yml restart nginx" | sudo tee /etc/cron.d/certbot-renew
+echo "0 3 * * * certbot renew --quiet && docker compose -f /opt/openschool/docker-compose.prod.yml restart nginx" | sudo tee /etc/cron.d/certbot-renew
 ```
 
 ---
@@ -395,25 +395,25 @@ A `scripts/backup.sh` szkript biztonsági mentést készít:
 ./scripts/backup.sh
 
 # Napi cron job beállítása (hajnali 3-kor fut)
-echo "0 3 * * * /opt/devschool/scripts/backup.sh" | crontab -
+echo "0 3 * * * /opt/openschool/scripts/backup.sh" | crontab -
 ```
 
 A szkript:
 - `pg_dump`-pal menti a PostgreSQL adatbázist
 - `.sql.gz` formátumra tömöríti
-- `/opt/devschool/backups/` mappába menti
+- `/opt/openschool/backups/` mappába menti
 - 30 napnál régebbi mentéseket törli
 
 ### Kézi mentés
 
 ```bash
-docker compose exec db pg_dump -U devschool devschool | gzip > backup_$(date +%Y%m%d).sql.gz
+docker compose exec db pg_dump -U openschool openschool | gzip > backup_$(date +%Y%m%d).sql.gz
 ```
 
 ### Visszaállítás mentésből
 
 ```bash
-gunzip < backup_20260310.sql.gz | docker compose exec -T db psql -U devschool devschool
+gunzip < backup_20260310.sql.gz | docker compose exec -T db psql -U openschool openschool
 ```
 
 ---

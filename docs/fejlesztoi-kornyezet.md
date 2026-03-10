@@ -1,6 +1,6 @@
 # Fejlesztői környezet beállítása
 
-Ez az útmutató lépésről lépésre végigvezet a DevSchool Platform fejlesztői környezetének felállításán.
+Ez az útmutató lépésről lépésre végigvezet a OpenSchool Platform fejlesztői környezetének felállításán.
 
 ## Előfeltételek
 
@@ -39,8 +39,8 @@ sudo apt install git
 ## 1. Projekt klónozása
 
 ```bash
-git clone https://github.com/ghemrich/devschool-platform.git
-cd devschool-platform
+git clone https://github.com/ghemrich/openschool-platform.git
+cd openschool-platform
 ```
 
 ---
@@ -95,10 +95,10 @@ cp .env.example .env
 A `.env` fájl tartalma fejlesztéshez:
 
 ```env
-DB_USER=devschool
-DB_PASSWORD=devschool
-DB_NAME=devschool
-DATABASE_URL=postgresql://devschool:devschool@db:5432/devschool
+DB_USER=openschool
+DB_PASSWORD=openschool
+DB_NAME=openschool
+DATABASE_URL=postgresql://openschool:openschool@db:5432/openschool
 SECRET_KEY=change-me-in-production
 BASE_URL=http://localhost
 GITHUB_CLIENT_ID=        # GitHub OAuth App Client ID
@@ -375,7 +375,7 @@ docker compose exec backend bash
 docker compose exec backend alembic upgrade head
 
 # PostgreSQL konzol
-docker compose exec db psql -U devschool -d devschool
+docker compose exec db psql -U openschool -d openschool
 
 # Újraépítés egy szolgáltatásra
 docker compose up -d --build backend
@@ -390,7 +390,7 @@ docker compose up --build -d
 ## 12. Projektstruktúra
 
 ```
-devschool-platform/
+openschool-platform/
 ├── .editorconfig              # Szerkesztő beállítások
 ├── .env.example               # Környezeti változók mintája
 ├── .github/
@@ -567,7 +567,7 @@ newgrp docker
 ```bash
 # Ellenőrizd, hogy a venv aktív-e
 which python
-# Várt: .../devschool-platform/.venv/bin/python
+# Várt: .../openschool-platform/.venv/bin/python
 
 # Ha nem, aktiváld:
 source .venv/bin/activate
@@ -593,7 +593,7 @@ docker compose ps
 docker compose up -d db
 
 # Lokális fejlesztéshez a DATABASE_URL legyen:
-# postgresql://devschool:devschool@localhost:5432/devschool
+# postgresql://openschool:openschool@localhost:5432/openschool
 # (localhost, nem db!)
 ```
 

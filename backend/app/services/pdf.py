@@ -52,7 +52,7 @@ def generate_certificate_pdf(
     pdf.set_font("Helvetica", "B", 36)
     pdf.set_text_color(44, 62, 80)
     pdf.set_y(30)
-    pdf.cell(0, 15, "DevSchool", ln=True, align="C")
+    pdf.cell(0, 15, "OpenSchool", ln=True, align="C")
 
     pdf.set_font("Helvetica", "", 16)
     pdf.set_text_color(127, 140, 141)

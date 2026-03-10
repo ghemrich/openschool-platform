@@ -1,12 +1,12 @@
-# DevSchool Platform — Jövőkép és fejlesztési terv
+# OpenSchool Platform — Jövőkép és fejlesztési terv
 
-Ez a dokumentum összefoglalja a DevSchool platform teljes vízióját a [kurzuskeretrendszer](../../testing/) alapján, és felméri, mi van készen, mi hiányzik, és mi a tervezett fejlesztési irány.
+Ez a dokumentum összefoglalja a OpenSchool platform teljes vízióját a [kurzuskeretrendszer](../../testing/) alapján, és felméri, mi van készen, mi hiányzik, és mi a tervezett fejlesztési irány.
 
 ---
 
-## A DevSchool elve
+## A OpenSchool elve
 
-A DevSchool nem egy hagyományos e-learning platform. A diákok **ugyanazokkal az eszközökkel dolgoznak, amelyeket az iparban is használnak**: GitHub, Discord, VS Code, Docker, pytest, CI/CD. A cél nem az, hogy egy feladatbeadó rendszert tanuljanak meg, hanem hogy **a munkafolyamat maga legyen a tananyag része**.
+A OpenSchool nem egy hagyományos e-learning platform. A diákok **ugyanazokkal az eszközökkel dolgoznak, amelyeket az iparban is használnak**: GitHub, Discord, VS Code, Docker, pytest, CI/CD. A cél nem az, hogy egy feladatbeadó rendszert tanuljanak meg, hanem hogy **a munkafolyamat maga legyen a tananyag része**.
 
 | Iskolai verzió | Ipari megfelelő |
 |----------------|-----------------|
@@ -25,7 +25,7 @@ A DevSchool nem egy hagyományos e-learning platform. A diákok **ugyanazokkal a
 |--------|----------|-----------|--------|
 | Python Alapok | 10. osztály | 13 hét, heti 2 óra | Bevezető Python kurzus |
 | Backend FastAPI | 13. évfolyam (esti/felnőtt) | 25 hét, heti 6 óra | Backend fejlesztés FastAPI-val |
-| Projekt Labor | Backend 13 után | 7 modul, egyéni tempó | A DevSchool platform felépítése |
+| Projekt Labor | Backend 13 után | 7 modul, egyéni tempó | A OpenSchool platform felépítése |
 
 ---
 

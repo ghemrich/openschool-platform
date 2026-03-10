@@ -1,8 +1,8 @@
-# DevSchool Platform — Architektúra
+# OpenSchool Platform — Architektúra
 
 ## Rendszer áttekintés
 
-A DevSchool egy oktatási platform, ahol a diákok valódi fejlesztői munkafolyamatokon keresztül tanulnak programozni. A platform kurzusokat kezel, követi a haladást, GitHub-bal integrálódik az azonosításhoz és a CI-alapú értékeléshez, valamint hitelesíthető tanúsítványokat állít ki.
+A OpenSchool egy oktatási platform, ahol a diákok valódi fejlesztői munkafolyamatokon keresztül tanulnak programozni. A platform kurzusokat kezel, követi a haladást, GitHub-bal integrálódik az azonosításhoz és a CI-alapú értékeléshez, valamint hitelesíthető tanúsítványokat állít ki.
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐

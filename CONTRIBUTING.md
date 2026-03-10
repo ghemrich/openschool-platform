@@ -1,6 +1,6 @@
-# Hozzájárulás a DevSchool Platformhoz
+# Hozzájárulás a OpenSchool Platformhoz
 
-Köszönjük, hogy hozzá szeretnél járulni a DevSchool fejlesztéséhez! Ez az útmutató segít az indulásban.
+Köszönjük, hogy hozzá szeretnél járulni a OpenSchool fejlesztéséhez! Ez az útmutató segít az indulásban.
 
 ## Hogyan indulj el
 
@@ -8,8 +8,8 @@ Köszönjük, hogy hozzá szeretnél járulni a DevSchool fejlesztéséhez! Ez a
 
 ```bash
 # Forkold a repót a GitHubon, majd klónozd
-git clone https://github.com/<te-felhasználóneved>/devschool-platform.git
-cd devschool-platform
+git clone https://github.com/<te-felhasználóneved>/openschool-platform.git
+cd openschool-platform
 ```
 
 ### 2. Lokális fejlesztői környezet felállítása

@@ -1,4 +1,4 @@
-# DevSchool Platform
+# OpenSchool Platform
 
 Online tanulási platform, amely kurzusokat kínál, követi a diákok haladását, és tanúsítványt állít ki.
 
@@ -58,7 +58,7 @@ make lint     # Ruff linter és formatter ellenőrzés
 ## Projekt struktúra
 
 ```
-devschool-platform/
+openschool-platform/
 ├── docker-compose.yml
 ├── .env.example
 ├── .github/workflows/ci.yml

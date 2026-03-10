@@ -30,7 +30,7 @@ const { id } = Astro.params;
         const data = await res.json();
         container.innerHTML = `
           <div class="valid-badge">&#10003; Érvényes</div>
-          <h1>DevSchool Tanúsítvány</h1>
+          <h1>OpenSchool Tanúsítvány</h1>
           <div class="verify-details">
             <p><strong>Név:</strong> ${data.name}</p>
             <p><strong>Kurzus:</strong> ${data.course}</p>
