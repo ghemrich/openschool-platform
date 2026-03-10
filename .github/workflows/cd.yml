@@ -7,6 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ secrets.VPS_HOST != '' }}
     steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
