@@ -1,0 +1,94 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="Admin">
+  <section class="page container">
+    <h1>Admin Panel</h1>
+    <div id="admin-content">
+      <p>Betöltés...</p>
+    </div>
+  </section>
+
+  <script>
+    const token = localStorage.getItem('access_token');
+    const container = document.getElementById('admin-content');
+
+    if (!token) {
+      window.location.href = '/login';
+    }
+
+    async function loadAdmin() {
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      // Check admin role
+      const meRes = await fetch('/api/auth/me', { headers });
+      if (!meRes.ok) { window.location.href = '/login'; return; }
+      const me = await meRes.json();
+      if (me.role !== 'admin') {
+        container.innerHTML = '<p style="color:var(--color-accent);">Nincs jogosultságod az admin panelhez.</p>';
+        return;
+      }
+
+      // Load stats
+      const statsRes = await fetch('/api/admin/stats', { headers });
+      if (!statsRes.ok) {
+        container.innerHTML = '<p>Hiba történt a statisztikák betöltésekor.</p>';
+        return;
+      }
+      const stats = await statsRes.json();
+
+      container.innerHTML = `
+        <div class="admin-nav" style="margin-bottom:32px;display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="/admin" class="btn btn-primary">Áttekintés</a>
+          <a href="/admin/users" class="btn btn-secondary">Felhasználók</a>
+          <a href="/admin/courses" class="btn btn-secondary">Kurzusok</a>
+        </div>
+
+        <h2 style="margin-bottom:20px;">Áttekintés</h2>
+        <div class="card-grid">
+          <div class="card stat-card">
+            <div class="stat-number">${stats.users}</div>
+            <div class="stat-label">Felhasználó</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">${stats.courses}</div>
+            <div class="stat-label">Kurzus</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">${stats.enrollments}</div>
+            <div class="stat-label">Beiratkozás</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">${stats.certificates}</div>
+            <div class="stat-label">Tanúsítvány</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">${stats.exercises}</div>
+            <div class="stat-label">Feladat</div>
+          </div>
+        </div>
+      `;
+    }
+
+    loadAdmin();
+  </script>
+</Layout>
+
+<style>
+  .page { padding: 40px 0; }
+  .page h1 { margin-bottom: 24px; }
+  .stat-card {
+    text-align: center;
+    padding: 32px 24px;
+  }
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--color-primary);
+  }
+  .stat-label {
+    font-size: 1rem;
+    color: var(--color-text-light);
+    margin-top: 4px;
+  }
+</style>

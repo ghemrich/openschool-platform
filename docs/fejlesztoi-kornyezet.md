@@ -272,6 +272,7 @@ pytest -v --tb=long
 
 ```
 backend/tests/
+├── test_admin.py         # Admin panel (statisztikák, felhasználók, törlés)
 ├── test_auth.py          # Autentikáció (OAuth, JWT)
 ├── test_certificates.py  # Tanúsítványok (PDF, QR)
 ├── test_classroom.py     # GitHub Classroom integráció
@@ -415,6 +416,12 @@ devschool-platform/
 │   │   ├── auth/              # JWT + OAuth logika
 │   │   ├── models/            # SQLAlchemy modellek
 │   │   ├── routers/           # API végpontok
+│   │   │   ├── admin.py       # Admin panel
+│   │   │   ├── auth.py        # OAuth + JWT
+│   │   │   ├── certificates.py
+│   │   │   ├── courses.py     # CRUD + beiratkozás
+│   │   │   ├── dashboard.py   # Haladás
+│   │   │   └── webhooks.py    # GitHub webhookok
 │   │   └── services/          # Üzleti logika (PDF, QR, GitHub)
 │   ├── tests/                 # Pytest tesztek
 │   ├── pyproject.toml         # Ruff + pytest konfig
@@ -424,6 +431,7 @@ devschool-platform/
 │   ├── src/
 │   │   ├── layouts/           # Astro layout-ok
 │   │   └── pages/             # Oldalak (routing)
+│       ├── admin/         # Admin oldalak (dashboard, users, courses)
 │   ├── public/                # Statikus fájlok
 │   ├── astro.config.mjs       # Astro konfiguráció
 │   ├── package.json           # Node.js függőségek

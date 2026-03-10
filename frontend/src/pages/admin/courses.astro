@@ -1,0 +1,235 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="Admin – Kurzusok">
+  <section class="page container">
+    <h1>Kurzusok kezelése</h1>
+    <div id="admin-content">
+      <p>Betöltés...</p>
+    </div>
+  </section>
+
+  <script>
+    const token = localStorage.getItem('access_token');
+    const container = document.getElementById('admin-content');
+    if (!token) { window.location.href = '/login'; }
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    async function loadCourses() {
+      const meRes = await fetch('/api/auth/me', { headers });
+      if (!meRes.ok) { window.location.href = '/login'; return; }
+      const me = await meRes.json();
+      if (me.role !== 'admin') {
+        container.innerHTML = '<p style="color:var(--color-accent);">Nincs jogosultságod.</p>';
+        return;
+      }
+
+      const res = await fetch('/api/courses');
+      if (!res.ok) { container.innerHTML = '<p>Hiba történt.</p>'; return; }
+      const courses = await res.json();
+
+      container.innerHTML = `
+        <div class="admin-nav" style="margin-bottom:32px;display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="/admin" class="btn btn-secondary">Áttekintés</a>
+          <a href="/admin/users" class="btn btn-secondary">Felhasználók</a>
+          <a href="/admin/courses" class="btn btn-primary">Kurzusok</a>
+        </div>
+
+        <div class="card" style="margin-bottom:24px;">
+          <h3 style="margin-bottom:16px;">Új kurzus létrehozása</h3>
+          <form id="create-course-form" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;">
+            <div>
+              <label style="display:block;font-size:0.85rem;margin-bottom:4px;">Név</label>
+              <input type="text" id="course-name" required style="padding:8px 12px;border:1px solid var(--color-border);border-radius:4px;font-size:0.95rem;width:250px;" />
+            </div>
+            <div>
+              <label style="display:block;font-size:0.85rem;margin-bottom:4px;">Leírás</label>
+              <input type="text" id="course-desc" style="padding:8px 12px;border:1px solid var(--color-border);border-radius:4px;font-size:0.95rem;width:350px;" />
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding:8px 20px;">Létrehozás</button>
+          </form>
+          <p id="create-msg" style="margin-top:8px;"></p>
+        </div>
+
+        <div id="course-list">
+          ${courses.map(c => `
+            <div class="card course-card" data-course-id="${c.id}" style="margin-bottom:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <h3>${c.name}</h3>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-secondary toggle-details" data-course-id="${c.id}" style="padding:6px 14px;font-size:0.85rem;">Részletek</button>
+                  <button class="btn delete-course" data-course-id="${c.id}" style="padding:6px 14px;font-size:0.85rem;background:#e74c3c;color:#fff;">Törlés</button>
+                </div>
+              </div>
+              <p style="color:var(--color-text-light);">${c.description || 'Nincs leírás'}</p>
+              <div class="course-details" id="details-${c.id}" style="display:none;margin-top:16px;border-top:1px solid var(--color-border);padding-top:16px;">
+                <p>Betöltés...</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      // Create course
+      document.getElementById('create-course-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('course-name').value.trim();
+        const description = document.getElementById('course-desc').value.trim();
+        const msg = document.getElementById('create-msg');
+        if (!name) return;
+
+        const r = await fetch('/api/courses', {
+          method: 'POST',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description })
+        });
+        if (r.ok) {
+          msg.innerHTML = '<span style="color:var(--color-success);">Kurzus létrehozva!</span>';
+          setTimeout(() => window.location.reload(), 500);
+        } else {
+          const d = await r.json();
+          msg.innerHTML = `<span style="color:var(--color-accent);">${d.detail || 'Hiba történt.'}</span>`;
+        }
+      });
+
+      // Toggle details
+      document.querySelectorAll('.toggle-details').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const courseId = btn.dataset.courseId;
+          const details = document.getElementById(`details-${courseId}`);
+          if (details.style.display === 'none') {
+            details.style.display = 'block';
+            await loadCourseDetails(courseId, details);
+          } else {
+            details.style.display = 'none';
+          }
+        });
+      });
+
+      // Delete course
+      document.querySelectorAll('.delete-course').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const courseId = btn.dataset.courseId;
+          if (!confirm('Biztosan törölni szeretnéd ezt a kurzust? Ez törli az összes modult, feladatot és beiratkozást!')) return;
+          const r = await fetch(`/api/admin/courses/${courseId}`, {
+            method: 'DELETE',
+            headers
+          });
+          if (r.ok) {
+            btn.closest('.course-card').remove();
+          } else {
+            const d = await r.json();
+            alert(d.detail || 'Hiba történt.');
+          }
+        });
+      });
+    }
+
+    async function loadCourseDetails(courseId, detailsEl) {
+      const res = await fetch(`/api/courses/${courseId}`);
+      if (!res.ok) { detailsEl.innerHTML = '<p>Hiba a betöltésnél.</p>'; return; }
+      const course = await res.json();
+
+      detailsEl.innerHTML = `
+        <div style="margin-bottom:16px;">
+          <h4 style="margin-bottom:8px;">Modul hozzáadása</h4>
+          <form class="add-module-form" data-course-id="${courseId}" style="display:flex;gap:8px;align-items:end;">
+            <input type="text" placeholder="Modul neve" required class="module-name" style="padding:6px 10px;border:1px solid var(--color-border);border-radius:4px;" />
+            <input type="number" placeholder="Sorrend" value="${course.modules.length + 1}" class="module-order" style="padding:6px 10px;border:1px solid var(--color-border);border-radius:4px;width:80px;" />
+            <button type="submit" class="btn btn-primary" style="padding:6px 14px;font-size:0.85rem;">Hozzáadás</button>
+          </form>
+        </div>
+
+        ${course.modules.sort((a, b) => a.order - b.order).map(m => `
+          <div class="module-block" style="background:var(--color-bg);padding:16px;border-radius:6px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <h4>${m.order}. ${m.name}</h4>
+              <button class="delete-module" data-module-id="${m.id}" style="background:#e74c3c;color:#fff;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.8rem;">Modul törlése</button>
+            </div>
+            <ul style="list-style:none;padding:0;">
+              ${m.exercises.sort((a, b) => a.order - b.order).map(e => `
+                <li style="padding:6px 0;border-bottom:1px solid var(--color-border);display:flex;justify-content:space-between;align-items:center;">
+                  <span>${e.order}. ${e.name} ${e.repo_prefix ? '<code style="font-size:0.8rem;background:#eee;padding:2px 6px;border-radius:3px;">' + e.repo_prefix + '</code>' : ''} ${e.classroom_url ? '📎' : ''}</span>
+                  <button class="delete-exercise" data-exercise-id="${e.id}" style="background:#e74c3c;color:#fff;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:0.75rem;">✕</button>
+                </li>
+              `).join('')}
+            </ul>
+            <form class="add-exercise-form" data-course-id="${courseId}" data-module-id="${m.id}" style="display:flex;gap:6px;flex-wrap:wrap;align-items:end;margin-top:8px;">
+              <input type="text" placeholder="Feladat neve" required class="ex-name" style="padding:4px 8px;border:1px solid var(--color-border);border-radius:4px;font-size:0.85rem;" />
+              <input type="text" placeholder="repo_prefix" class="ex-repo" style="padding:4px 8px;border:1px solid var(--color-border);border-radius:4px;font-size:0.85rem;width:130px;" />
+              <input type="text" placeholder="classroom_url" class="ex-classroom" style="padding:4px 8px;border:1px solid var(--color-border);border-radius:4px;font-size:0.85rem;width:180px;" />
+              <input type="number" placeholder="#" value="${m.exercises.length + 1}" class="ex-order" style="padding:4px 8px;border:1px solid var(--color-border);border-radius:4px;width:50px;font-size:0.85rem;" />
+              <button type="submit" class="btn btn-primary" style="padding:4px 12px;font-size:0.85rem;">+ Feladat</button>
+            </form>
+          </div>
+        `).join('')}
+      `;
+
+      // Add module
+      detailsEl.querySelectorAll('.add-module-form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const cid = form.dataset.courseId;
+          const name = form.querySelector('.module-name').value.trim();
+          const order = parseInt(form.querySelector('.module-order').value) || 0;
+          const r = await fetch(`/api/courses/${cid}/modules`, {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, order })
+          });
+          if (r.ok) { await loadCourseDetails(cid, detailsEl); }
+          else { const d = await r.json(); alert(d.detail || 'Hiba'); }
+        });
+      });
+
+      // Add exercise
+      detailsEl.querySelectorAll('.add-exercise-form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const cid = form.dataset.courseId;
+          const mid = form.dataset.moduleId;
+          const r = await fetch(`/api/courses/${cid}/modules/${mid}/exercises`, {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: form.querySelector('.ex-name').value.trim(),
+              repo_prefix: form.querySelector('.ex-repo').value.trim(),
+              classroom_url: form.querySelector('.ex-classroom').value.trim(),
+              order: parseInt(form.querySelector('.ex-order').value) || 0
+            })
+          });
+          if (r.ok) { await loadCourseDetails(cid, detailsEl); }
+          else { const d = await r.json(); alert(d.detail || 'Hiba'); }
+        });
+      });
+
+      // Delete module
+      detailsEl.querySelectorAll('.delete-module').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Biztosan törölni szeretnéd ezt a modult és az összes feladatát?')) return;
+          const mid = btn.dataset.moduleId;
+          const r = await fetch(`/api/admin/modules/${mid}`, { method: 'DELETE', headers });
+          if (r.ok) { await loadCourseDetails(courseId, detailsEl); }
+          else { const d = await r.json(); alert(d.detail || 'Hiba'); }
+        });
+      });
+
+      // Delete exercise
+      detailsEl.querySelectorAll('.delete-exercise').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const eid = btn.dataset.exerciseId;
+          const r = await fetch(`/api/admin/exercises/${eid}`, { method: 'DELETE', headers });
+          if (r.ok) { btn.closest('li').remove(); }
+          else { const d = await r.json(); alert(d.detail || 'Hiba'); }
+        });
+      });
+    }
+
+    loadCourses();
+  </script>
+</Layout>
+
+<style>
+  .page { padding: 40px 0; }
+  .page h1 { margin-bottom: 24px; }
+</style>

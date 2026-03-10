@@ -145,6 +145,8 @@ GITHUB_CLIENT_SECRET=your_client_secret
 | `BASE_URL` | Igen | A platform publikus URL-je (tanúsítványokhoz, QR kódokhoz) |
 | `GITHUB_CLIENT_ID` | Igen | GitHub OAuth App kliens azonosító |
 | `GITHUB_CLIENT_SECRET` | Igen | GitHub OAuth App kliens titkos kulcs |
+| `GITHUB_ORG` | Nem | GitHub szervezet neve (Classroom integrációhoz) |
+| `GITHUB_WEBHOOK_SECRET` | Nem | GitHub webhook titkos kulcs (Classroom webhookhoz) |
 | `DB_USER` | Igen | PostgreSQL felhasználónév (docker-compose használja) |
 | `DB_PASSWORD` | Igen | PostgreSQL jelszó (docker-compose használja) |
 | `DB_NAME` | Igen | PostgreSQL adatbázisnév (docker-compose használja) |

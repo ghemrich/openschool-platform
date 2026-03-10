@@ -1,0 +1,157 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="Admin – Felhasználók">
+  <section class="page container">
+    <h1>Felhasználók kezelése</h1>
+    <div id="admin-content">
+      <p>Betöltés...</p>
+    </div>
+  </section>
+
+  <script>
+    const token = localStorage.getItem('access_token');
+    const container = document.getElementById('admin-content');
+
+    if (!token) { window.location.href = '/login'; }
+
+    async function loadUsers() {
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      const meRes = await fetch('/api/auth/me', { headers });
+      if (!meRes.ok) { window.location.href = '/login'; return; }
+      const me = await meRes.json();
+      if (me.role !== 'admin') {
+        container.innerHTML = '<p style="color:var(--color-accent);">Nincs jogosultságod.</p>';
+        return;
+      }
+
+      const res = await fetch('/api/admin/users', { headers });
+      if (!res.ok) {
+        container.innerHTML = '<p>Hiba történt.</p>';
+        return;
+      }
+      const users = await res.json();
+
+      container.innerHTML = `
+        <div class="admin-nav" style="margin-bottom:32px;display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="/admin" class="btn btn-secondary">Áttekintés</a>
+          <a href="/admin/users" class="btn btn-primary">Felhasználók</a>
+          <a href="/admin/courses" class="btn btn-secondary">Kurzusok</a>
+        </div>
+
+        <div class="card" style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Avatar</th>
+                <th>Felhasználónév</th>
+                <th>Email</th>
+                <th>Szerepkör</th>
+                <th>Regisztráció</th>
+                <th>Utolsó belépés</th>
+                <th>Művelet</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${users.map(u => `
+                <tr>
+                  <td><img src="${u.avatar_url || ''}" alt="" class="avatar" /></td>
+                  <td><strong>${u.username}</strong></td>
+                  <td>${u.email || '–'}</td>
+                  <td>
+                    <select class="role-select" data-user-id="${u.id}" data-current-role="${u.role}">
+                      <option value="student" ${u.role === 'student' ? 'selected' : ''}>Student</option>
+                      <option value="mentor" ${u.role === 'mentor' ? 'selected' : ''}>Mentor</option>
+                      <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    </select>
+                  </td>
+                  <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('hu-HU') : '–'}</td>
+                  <td>${u.last_login ? new Date(u.last_login).toLocaleDateString('hu-HU') : '–'}</td>
+                  <td>
+                    <button class="btn-save-role btn btn-primary" data-user-id="${u.id}" style="padding:6px 14px;font-size:0.85rem;display:none;">Mentés</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <p id="status-msg" style="margin-top:12px;"></p>
+      `;
+
+      // Show save button when role changes
+      document.querySelectorAll('.role-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+          const userId = e.target.dataset.userId;
+          const btn = document.querySelector(`.btn-save-role[data-user-id="${userId}"]`);
+          if (e.target.value !== e.target.dataset.currentRole) {
+            btn.style.display = 'inline-block';
+          } else {
+            btn.style.display = 'none';
+          }
+        });
+      });
+
+      // Save role
+      document.querySelectorAll('.btn-save-role').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const userId = e.target.dataset.userId;
+          const select = document.querySelector(`.role-select[data-user-id="${userId}"]`);
+          const newRole = select.value;
+          const msg = document.getElementById('status-msg');
+
+          const r = await fetch(`/api/admin/users/${userId}/role`, {
+            method: 'PATCH',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: newRole })
+          });
+
+          if (r.ok) {
+            select.dataset.currentRole = newRole;
+            e.target.style.display = 'none';
+            msg.innerHTML = `<span style="color:var(--color-success);">Szerepkör frissítve.</span>`;
+          } else {
+            const d = await r.json();
+            msg.innerHTML = `<span style="color:var(--color-accent);">${d.detail || 'Hiba történt.'}</span>`;
+          }
+        });
+      });
+    }
+
+    loadUsers();
+  </script>
+</Layout>
+
+<style>
+  .page { padding: 40px 0; }
+  .page h1 { margin-bottom: 24px; }
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .admin-table th,
+  .admin-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+  .admin-table th {
+    font-weight: 600;
+    color: var(--color-text-light);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+  .role-select {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    font-size: 0.9rem;
+  }
+</style>

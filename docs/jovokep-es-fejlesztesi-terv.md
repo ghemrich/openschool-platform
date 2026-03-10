@@ -47,6 +47,8 @@ A DevSchool nem egy hagyományos e-learning platform. A diákok **ugyanazokkal a
 | PDF generálás QR kóddal | `services/pdf.py` (fpdf2, vektor QR) | ✅ Működik |
 | Tanúsítvány hitelesítés | `/api/verify/{cert_id}` | ✅ Működik |
 | Dinamikus BASE_URL | Környezeti változóból | ✅ Működik |
+| GitHub Classroom integráció | `classroom_url`, webhook, sync | ✅ Működik |
+| Admin panel API | `/api/admin/*` — statisztikák, felhasználók, törlés | ✅ Működik |
 
 ### ✅ Frontend — alapvető oldalak
 
@@ -58,6 +60,9 @@ A DevSchool nem egy hagyományos e-learning platform. A diákok **ugyanazokkal a
 | Bejelentkezés | `/login` | ✅ Kész |
 | Dashboard | `/dashboard` | ✅ Kész |
 | Tanúsítvány hitelesítés | `/verify/[id]` | ✅ Kész |
+| Admin dashboard | `/admin` | ✅ Kész |
+| Admin felhasználók | `/admin/users` | ✅ Kész |
+| Admin kurzusok | `/admin/courses` | ✅ Kész |
 
 ### ✅ Infrastruktúra
 
@@ -66,7 +71,7 @@ A DevSchool nem egy hagyományos e-learning platform. A diákok **ugyanazokkal a
 | Docker Compose (fejlesztés) | ✅ 4 szolgáltatás (backend, db, nginx, frontend) |
 | Docker Compose (éles) | ✅ restart, healthcheck, log rotáció |
 | nginx reverse proxy | ✅ API proxy + statikus fájlok |
-| Alembic migrációk | ✅ 3 migráció |
+| Alembic migrációk | ✅ 4 migráció |
 | GitHub Actions CI | ✅ pytest minden push-ra |
 | GitHub Actions CD | ✅ SSH deploy (secrets konfigurálandó) |
 | Biztonsági mentés szkript | ✅ pg_dump + 30 napos retenciő |
@@ -88,30 +93,45 @@ A DevSchool nem egy hagyományos e-learning platform. A diákok **ugyanazokkal a
 | Teszt | Állapot |
 |-------|---------|
 | Auth tesztek (8 teszt) | ✅ |
-| Kurzus tesztek | ✅ |
-| Tanúsítvány tesztek | ✅ |
+| Kurzus tesztek (14 teszt) | ✅ |
+| Tanúsítvány tesztek (12 teszt) | ✅ |
+| GitHub Classroom tesztek (9 teszt) | ✅ |
+| Admin tesztek (11 teszt) | ✅ |
 | Health check teszt | ✅ |
-| **Összesen: 36 teszt** | ✅ Mind zöld |
+| Egyéb tesztek | ✅ |
+| **Összesen: 56 teszt** | ✅ Mind zöld |
 
 ---
 
-## Hiányzó funkciók és fejlesztési terv
+## Megvalósított és tervezett fejlesztések
 
-### 🔴 1. fázis — GitHub Classroom integráció
+### ✅ GitHub Classroom integráció
 
 A kurzuskeretrendszer lényege, hogy a diákok GitHub Classroom-on keresztül adják be a feladataikat, és a platform ezt tükrözi.
 
-**Szükséges fejlesztések:**
+**Implementált funkciók:**
 
-- [ ] GitHub Classroom assignment linkek tárolása az `Exercise` modellben
-- [ ] Automatikus haladás frissítés a GitHub API-ból (jelenleg a service megvan, de nincs periodikus hívás)
-- [ ] Webhook fogadás GitHub-ból (push eseményekre) a haladás valós idejű frissítéséhez
-- [ ] Tanári nézet: diákok haladásának összesítése kurzusonként
+- [x] GitHub Classroom assignment linkek tárolása az `Exercise` modellben (`classroom_url`)
+- [x] Automatikus haladás frissítés a GitHub API-ból
+- [x] Webhook fogadás GitHub-ból (push eseményekre) a haladás valós idejű frissítéséhez
+- [x] Tanári nézet: diákok haladásának összeszítése kurzusonként
 - [ ] GitHub Classroom CSV import a jegyekhez
 
 **Miért fontos:** Ez a platform alapvető értékajánlata — a diákok valódi GitHub repókban dolgoznak, és a platform automatikusan követi a haladásukat.
 
-### 🔴 2. fázis — Discord integráció
+### ✅ Admin panel
+
+Az admin felhasználók számára dedikált kezelőfelület a platform adminisztrációjához.
+
+**Implementált funkciók:**
+
+- [x] Admin dashboard statisztikákkal (felhasználók, kurzusok, beiratkozások, tanúsítványok, gyakorlatok)
+- [x] Felhasználók listázása és szerepkör módosítása
+- [x] Kurzusok, modulok, gyakorlatok létrehozása és törlése
+- [x] Szerepkör-alapú hozzáférésvédelem (csak admin)
+- [x] 11 teszt az admin végpontokhoz
+
+### 🔴 1. fázis — Discord integráció
 
 A kurzuskeretrendszer Discord szervert használ a kommunikációhoz, heti szálakkal és automatikus értesítésekkel.
 
@@ -148,7 +168,7 @@ A kurzuskeretrendszer Discord szervert használ a kommunikációhoz, heti szála
   #általános
 ```
 
-### 🟠 3. fázis — Tanári eszközök
+### 🟠 2. fázis — Tanári eszközök
 
 - [ ] Tanári dashboard: összes diák haladása egy helyen
 - [ ] Jegykalkulátor integráció (jelenleg CLI szkript: `jegy-szamolo.py`)
@@ -156,7 +176,7 @@ A kurzuskeretrendszer Discord szervert használ a kommunikációhoz, heti szála
 - [ ] Házi feladatok határidejének kezelése
 - [ ] Exportálás: jegyek CSV-be
 
-### 🟠 4. fázis — Haladó funkciók
+### 🟠 3. fázis — Haladó funkciók
 
 - [ ] Pull Request alapú beadás (branch-elés, review)
 - [ ] GitHub Issues használata feladatkezeléshez
@@ -164,7 +184,7 @@ A kurzuskeretrendszer Discord szervert használ a kommunikációhoz, heti szála
 - [ ] Csapatmunka támogatás (közös repók, konfliktuskezelés)
 - [ ] Értesítési rendszer (email vagy push notification)
 
-### 🟢 5. fázis — Platform érettség
+### 🟢 4. fázis — Platform érettség
 
 - [ ] Reszponzív design finomhangolás (mobil, tablet, desktop)
 - [ ] Sötét mód
@@ -192,11 +212,10 @@ A kurzuskeretrendszer (`../testing/`) több külső eszközt tartalmaz, amelyek 
 ## Prioritási sorrend
 
 1. **VPS telepítés** (az éles rendszer felállítása a saját domainnel) ← **KÖVETKEZŐ LÉPÉS**
-2. **GitHub Classroom integráció** — ez a platform fő értéke
-3. **Discord integráció** — a közösségi kommunikáció
-4. **Tanári eszközök** — jegykalkulátor, haladás összesítés
-5. **Haladó funkciók** — PR-ek, Issues, csapatmunka
-6. **Platform érettség** — monitoring, analitika, teljesítmény
+2. **Discord integráció** — a közösségi kommunikáció
+3. **Tanári eszközök** — jegykalkulátor, haladás összeszítés
+4. **Haladó funkciók** — PR-ek, Issues, csapatmunka
+5. **Platform érettség** — monitoring, analitika, teljesítmény
 
 ---
 

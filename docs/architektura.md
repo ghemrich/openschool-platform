@@ -44,10 +44,12 @@ backend/
 │   │   ├── course.py         # Course, Module, Exercise, Enrollment, Progress
 │   │   └── certificate.py    # Certificate (UUID, PDF útvonal)
 │   ├── routers/
+│   │   ├── admin.py          # /api/admin/* — admin panel (statisztikák, felhasználók, törlés)
 │   │   ├── auth.py           # /api/auth/* — OAuth, bejelentkezés, profil
+│   │   ├── certificates.py   # /api/me/certificates/*, /api/verify/*
 │   │   ├── courses.py        # /api/courses/* — CRUD, beiratkozás, modulok
 │   │   ├── dashboard.py      # /api/me/* — haladás, dashboard
-│   │   └── certificates.py   # /api/me/certificates/*, /api/verify/*
+│   │   └── webhooks.py       # /api/webhooks/* — GitHub webhook fogadás
 │   └── services/
 │       ├── certificate.py    # is_course_completed() — teljesítés ellenőrzés
 │       ├── pdf.py            # PDF generálás fpdf2-vel
@@ -88,8 +90,8 @@ GET /api/auth/callback?code=xxx
 | Szerepkör | Jogosultságok |
 |-----------|---------------|
 | `student` | Beiratkozás kurzusokra, haladás megtekintése, tanúsítvány igénylése |
-| `mentor` | Minden, amit a student + (jövőben: review, mentorálás) |
-| `admin` | Minden + kurzusok, modulok, gyakorlatok létrehozása/szerkesztése |
+| `mentor` | Minden, amit a student + diákok haladásának megtekintése |
+| `admin` | Minden + kurzusok/modulok/gyakorlatok CRUD, felhasználók kezelése, admin panel |
 
 ### Adatmodell
 
@@ -109,10 +111,10 @@ User ──────────────────┐
 
 | Tábla | Kulcs mezők |
 |-------|-------------|
-| `users` | github_id, username, email, avatar_url, role (student/mentor/admin) |
+| `users` | github_id, username, email, avatar_url, role (student/mentor/admin), github_token |
 | `courses` | name, description |
 | `modules` | course_id, name, order |
-| `exercises` | module_id, name, repo_prefix, order, required |
+| `exercises` | module_id, name, repo_prefix, order, required, classroom_url |
 | `enrollments` | user_id, course_id, enrolled_at |
 | `progress` | user_id, exercise_id, status (not_started/in_progress/completed), github_repo |
 | `certificates` | cert_id (UUID), user_id, course_id, issued_at, pdf_path |
@@ -131,6 +133,9 @@ User ──────────────────┐
 | `/login` | Nem | GitHub OAuth bejelentkezés, token kezelés |
 | `/dashboard` | Igen | Beiratkozott kurzusok, haladási sávok, tanúsítványok |
 | `/verify/[id]` | Nem | Nyilvános tanúsítvány hitelesítés |
+| `/admin` | Igen (admin) | Admin dashboard — statisztikák |
+| `/admin/users` | Igen (admin) | Felhasználók kezelése, szerepkörök módosítása |
+| `/admin/courses` | Igen (admin) | Kurzusok, modulok, gyakorlatok kezelése |
 
 ### Statikus kimenet
 

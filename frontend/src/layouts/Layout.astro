@@ -52,7 +52,19 @@ const { title } = Astro.props;
     const token = localStorage.getItem('access_token');
     if (authNav) {
       if (token) {
-        authNav.innerHTML = '<a href="/dashboard">Profilom</a>';
+        // Check if admin
+        fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
+          .then(r => r.ok ? r.json() : null)
+          .then(user => {
+            if (user && user.role === 'admin') {
+              authNav.innerHTML = '<a href="/admin">Admin</a> <a href="/dashboard">Profilom</a>';
+            } else {
+              authNav.innerHTML = '<a href="/dashboard">Profilom</a>';
+            }
+          })
+          .catch(() => {
+            authNav.innerHTML = '<a href="/dashboard">Profilom</a>';
+          });
       } else {
         authNav.innerHTML = '<a href="/login" style="display:inline-block;padding:8px 20px;background:#e74c3c;color:#fff;border-radius:6px;font-weight:600;font-size:0.9rem;text-decoration:none;">Belépés</a>';
       }
