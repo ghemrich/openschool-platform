@@ -53,6 +53,8 @@
 - Add git-cliff changelog automation and update project structure
 - Fix content inconsistencies across all documentation
 - Restructure into separate backend/frontend guides
+- Add Discord integration guide, documentation guide, and CI notify script
+- Update roadmap to reflect current state
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -63,6 +65,7 @@
 - Split requirements into prod and dev
 - Add automated maintenance scripts and documentation
 - Automate VPS setup and security checklist
+- Add Discord notifications to CI/CD workflows
 
 ### 🛡️ Security
 
