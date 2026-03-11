@@ -1,7 +1,8 @@
 ---
+import { SITE } from '../lib/config.js';
 ---
 <footer class="site-footer">
   <div class="container">
-    <p>&copy; {new Date().getFullYear()} OpenSchool. Minden jog fenntartva.</p>
+    <p>&copy; {new Date().getFullYear()} {SITE.name}. Minden jog fenntartva. · <a href={SITE.github} target="_blank" rel="noopener noreferrer">GitHub</a></p>
   </div>
 </footer>

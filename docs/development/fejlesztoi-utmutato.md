@@ -383,7 +383,7 @@ openschool-platform/
 │   ├── src/
 │   │   ├── components/        # Astro komponensek
 │   │   ├── layouts/           # Astro layout-ok
-│   │   ├── lib/               # Kliens oldali JS modulok
+│   │   ├── lib/               # Kliens oldali JS modulok (api, config, dashboard, course-detail)
 │   │   ├── pages/             # Oldalak (routing)
 │   │   │   └── admin/         # Admin oldalak (dashboard, users, courses)
 │   │   └── styles/            # CSS stílusok

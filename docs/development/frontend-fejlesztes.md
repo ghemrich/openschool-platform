@@ -64,6 +64,7 @@ frontend/
     │
     ├── lib/
     │   ├── api.js             # API wrapper — token kezelés, auto-refresh
+    │   ├── config.js          # Oldal konfiguráció (név, GitHub URL)
     │   ├── dashboard.js       # Dashboard logika — kurzusok, tanúsítványok, sync
     │   └── course-detail.js   # Kurzus részletek — modulok, beiratkozás
     │
