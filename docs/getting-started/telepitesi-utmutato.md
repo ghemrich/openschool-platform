@@ -15,11 +15,11 @@ Ez az útmutató a helyi fejlesztést, a staging és az éles (production) üzem
 5. [Adatbázis és migrációk](#adatbázis-és-migrációk)
 6. [GitHub OAuth beállítás](#github-oauth-beállítás)
 7. [Tesztek futtatása](#tesztek-futtatása)
-8. [Staging telepítés](#staging-telepítés)
-9. [Éles telepítés (VPS)](#éles-telepítés-vps)
-10. [SSH biztonság](#ssh-biztonság)
-11. [DNS és Cloudflare konfiguráció](#dns-és-cloudflare-konfiguráció)
-12. [SSL/TLS Let's Encrypt-tel](#ssltls-lets-encrypttel)
+8. [Éles telepítés (VPS)](#éles-telepítés-vps)
+9. [SSH biztonság](#ssh-biztonság)
+10. [DNS és Cloudflare konfiguráció](#dns-és-cloudflare-konfiguráció)
+11. [SSL/TLS Let's Encrypt-tel](#ssltls-lets-encrypttel)
+12. [Staging telepítés](#staging-telepítés)
 13. [Karbantartás és provisioning](#karbantartás-és-provisioning)
 14. [Deploy SSH kulcs CI/CD-hez](#deploy-ssh-kulcs-cicd-hez)
 15. [Biztonsági mentés](#biztonsági-mentés)
@@ -231,164 +231,6 @@ A CI pipeline minden push és PR esetén automatikusan futtatja a teszteket.
 
 ---
 
-## Staging telepítés
-
-A staging környezet az éles rendszer tükörképe, ahol a `develop` branch-et teszteljük deploy előtt. A staging és a production környezet **teljesen elkülönített** — saját adatbázis, saját GitHub OAuth app, saját domain.
-
-### 1. GitHub OAuth app staging-hez
-
-A staging-nek **külön** GitHub OAuth alkalmazás kell (a callback URL eltér):
-
-1. [GitHub Settings > Developer settings > OAuth Apps > New](https://github.com/settings/developers)
-2. Beállítások:
-   - **Application name:** `OpenSchool Staging`
-   - **Homepage URL:** `https://staging.yourdomain.com`
-   - **Authorization callback URL:** `https://staging.yourdomain.com/api/auth/callback`
-3. Jegyezd fel a `Client ID` és `Client Secret` értékeket
-
-### 2. Szerver előkészítése
-
-Staging futhat ugyanazon a VPS-en (eltérő portokon) vagy külön szerveren:
-
-```bash
-# Projekt könyvtár (elkülönítve a production-től)
-sudo mkdir -p /opt/openschool-staging
-sudo chown $USER:$USER /opt/openschool-staging
-cd /opt/openschool-staging
-
-# Klónozás (develop branch)
-git clone -b develop git@github.com:ghemrich/openschool-platform.git .
-```
-
-### 3. Környezeti változók
-
-Hozz létre `.env.staging` fájlt a szerveren:
-
-```bash
-DATABASE_URL=postgresql://openschool_staging:STAGING_JELSZO@db:5432/openschool_staging
-SECRET_KEY=$(openssl rand -hex 32)
-BASE_URL=https://staging.yourdomain.com
-ENVIRONMENT=staging
-ALLOWED_ORIGINS=https://staging.yourdomain.com
-GITHUB_CLIENT_ID=staging_oauth_client_id
-GITHUB_CLIENT_SECRET=staging_oauth_client_secret
-GITHUB_WEBHOOK_SECRET=$(openssl rand -hex 20)
-DB_USER=openschool_staging
-DB_PASSWORD=STAGING_JELSZO
-DB_NAME=openschool_staging
-```
-
-> ⚠️ **Fontos:** A staging és production adatbázis **külön** kell legyen. Soha ne használj production adatokat staging-en felhasználói adatvédelmi okokból.
-
-### 4. DNS konfiguráció
-
-Hozz létre egy `A` rekordot a DNS szolgáltatónál:
-
-```
-staging.yourdomain.com  →  A  →  VPS_IP
-```
-
-Ha ugyanazon a VPS-en fut mint a production, az nginx reverse proxy megoldja a routolást a domain alapján.
-
-### 5. Indítás
-
-```bash
-cd /opt/openschool-staging
-
-# Telepítés a production compose fájllal, staging env-vel
-docker compose -f docker-compose.prod.yml --env-file .env.staging up --build -d
-
-# Migráció futtatása
-docker compose -f docker-compose.prod.yml --env-file .env.staging exec -T backend alembic upgrade head
-
-# Ellenőrzés
-docker compose -f docker-compose.prod.yml --env-file .env.staging ps
-curl -f http://localhost:8000/health
-```
-
-> **Megjegyzés:** Ha a production és staging ugyanazon a gépen fut, a staging-nek eltérő portokat kell használnia. Ezt a `docker-compose.prod.yml` felülírásával oldhatod meg:
-> ```bash
-> # docker-compose.staging.yml (override)
-> services:
->   nginx:
->     ports:
->       - "8080:80"
->   backend:
->     ports:
->       - "8001:8000"
-> ```
-> Indítás: `docker compose -f docker-compose.prod.yml -f docker-compose.staging.yml --env-file .env.staging up --build -d`
-
-### 6. Deploy folyamat
-
-A staging deploy a `develop` branch-ről történik:
-
-```bash
-cd /opt/openschool-staging
-git pull origin develop
-docker compose -f docker-compose.prod.yml --env-file .env.staging up --build -d
-docker compose -f docker-compose.prod.yml --env-file .env.staging exec -T backend alembic upgrade head
-curl -f http://localhost:8000/health
-```
-
-**Automatizálás (opcionális):** A CD pipeline kibővíthető staging deploy-jal a `develop` branch-re:
-
-```yaml
-# .github/workflows/cd.yml — staging job hozzáadása
-staging-deploy:
-  runs-on: ubuntu-latest
-  needs: test
-  if: github.ref == 'refs/heads/develop' && vars.STAGING_HOST != ''
-  environment: staging
-  steps:
-    - name: Deploy to staging
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ vars.STAGING_HOST }}
-        username: ${{ secrets.STAGING_USER }}
-        key: ${{ secrets.STAGING_SSH_KEY }}
-        script: |
-          set -e
-          cd /opt/openschool-staging
-          git pull origin develop
-          docker compose -f docker-compose.prod.yml --env-file .env.staging up --build -d
-          docker compose -f docker-compose.prod.yml --env-file .env.staging exec -T backend alembic upgrade head
-          sleep 5
-          curl -f http://localhost:8000/health
-          echo "Staging deploy successful!"
-```
-
-Ehhez a GitHub repo-ban be kell állítani:
-- **Environment:** `staging` (Settings > Environments)
-- **Variables:** `STAGING_HOST`
-- **Secrets:** `STAGING_USER`, `STAGING_SSH_KEY`
-
-### 7. Migráció tesztelés staging-en
-
-A staging elsődleges célja az adatbázis migrációk tesztelése éles deploy előtt:
-
-1. **Migráció generálása** a fejlesztői gépen (`alembic revision --autogenerate`)
-2. **PR nyitása** `develop`-ra → CI futtatja a teszteket
-3. **Merge `develop`-ba** → staging deploy (manuális vagy automatikus)
-4. **Migráció futtatása staging-en** → ellenőrzés, hogy sikeres-e
-5. **Funkcionális teszt** staging-en (manuális)
-6. **Merge `main`-be** → production deploy
-
-### 8. Staging vs Production összehasonlítás
-
-| Szempont | Staging | Production |
-|----------|---------|------------|
-| Branch | `develop` | `main` |
-| Domain | `staging.yourdomain.com` | `yourdomain.com` |
-| Adatbázis | `openschool_staging` | `openschool` |
-| GitHub OAuth | Külön app | Külön app |
-| `ENVIRONMENT` | `staging` | `production` |
-| Swagger UI | Elérhető (`/docs`) | Letiltva |
-| Deploy | Manuális / develop push | Automatikus main push |
-| Cél | Tesztelés, review | Felhasználói forgalom |
-
----
-
 ## Éles telepítés (VPS)
 
 ### Automatizált telepítés (ajánlott)
@@ -439,7 +281,22 @@ curl -fsSL https://get.docker.com | sh
 apt-get install -y docker-compose-plugin
 ```
 
-#### 1b. Deploy felhasználó létrehozása
+#### 1b. Tűzfal beállítása (UFW)
+
+```bash
+# Tűzfal engedélyezése — csak SSH, HTTP és HTTPS portok
+ufw allow OpenSSH
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw --force enable
+
+# Ellenőrzés
+ufw status
+```
+
+> A PostgreSQL port (5432) **nem** szabad kívülről elérhető legyen — a Docker-en belül érik el a szolgáltatások.
+
+#### 1c. Deploy felhasználó létrehozása
 
 Ne futtasd a szolgáltatásokat root-ként — hozz létre egy dedikált deploy felhasználót:
 
@@ -715,6 +572,307 @@ echo "0 3 * * * certbot renew --quiet && docker compose -f /opt/openschool/docke
 >   --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
 >   -d yourdomain.com
 > ```
+
+---
+
+## Staging telepítés
+
+A staging környezet az éles rendszer tükörképe, ahol a `develop` branch-et teszteljük deploy előtt. A staging és a production **teljesen elkülönített** — saját adatbázis, saját GitHub OAuth app, saját domain — de **ugyanazon a VPS-en** futnak.
+
+### Architektúra
+
+A staging a production mellett fut ugyanazon a VPS-en, megosztott Docker hálózaton keresztül:
+
+```
+Internet
+  │
+  ▼
+Cloudflare (SSL termination + CDN)
+  │
+  ▼ HTTPS
+Production nginx (docker-compose.prod.yml)
+  ├── yourdomain.com → backend (prod)
+  └── staging.yourdomain.com ──► openschool-net ──► Staging nginx (docker-compose.staging.yml)
+                                                       └── backend (staging)
+```
+
+- A **production nginx** kezeli az SSL-t mindkét domainhez (egyetlen Let's Encrypt tanúsítvány)
+- A staging kéréseket az `openschool-net` Docker hálózaton keresztül proxy-zza a staging nginx konténerbe
+- A **staging nginx** (`nginx-staging.conf`) csak HTTP-t szolgál ki — az SSL-t a production nginx terminálja
+- Minden más (backend, DB, frontend) teljesen elkülönített
+
+### 1. GitHub OAuth app staging-hez
+
+A staging-nek **külön** GitHub OAuth alkalmazás kell (a callback URL eltér):
+
+1. [GitHub Settings > Developer settings > OAuth Apps > New](https://github.com/settings/developers)
+2. Beállítások:
+   - **Application name:** `OpenSchool Staging`
+   - **Homepage URL:** `https://staging.yourdomain.com`
+   - **Authorization callback URL:** `https://staging.yourdomain.com/api/auth/callback`
+3. Jegyezd fel a `Client ID` és `Client Secret` értékeket
+
+### 2. Docker hálózat létrehozása
+
+A production és staging nginx konténerek egy közös Docker hálózaton kommunikálnak:
+
+```bash
+docker network create openschool-net
+```
+
+> Ez a hálózat mindkét compose stack-ben `external: true`-ként van hivatkozva, tehát a compose nem hozza létre automatikusan — **előre létre kell hozni**.
+
+### 3. Staging könyvtár és klónozás
+
+```bash
+# Staging könyvtár létrehozása (elkülönítve a /opt/openschool production-től)
+sudo mkdir -p /opt/openschool-staging
+sudo chown openschool:openschool /opt/openschool-staging
+
+# Klónozás (develop branch)
+su - openschool
+cd /opt/openschool-staging
+git clone -b develop git@github.com:ghemrich/openschool-platform.git .
+```
+
+### 4. Környezeti változók
+
+Hozz létre `.env.staging` fájlt, majd szimlinkelj:
+
+```bash
+cd /opt/openschool-staging
+
+# Erős jelszavak generálása
+DB_PASS=$(openssl rand -base64 24)
+SECRET=$(openssl rand -hex 32)
+WEBHOOK_SECRET=$(openssl rand -hex 20)
+
+cat > .env.staging << EOF
+DB_USER=openschool_staging
+DB_PASSWORD=$DB_PASS
+DB_NAME=openschool_staging
+DATABASE_URL=postgresql://openschool_staging:${DB_PASS}@db:5432/openschool_staging
+SECRET_KEY=$SECRET
+BASE_URL=https://staging.yourdomain.com
+ENVIRONMENT=staging
+ALLOWED_ORIGINS=https://staging.yourdomain.com
+GITHUB_CLIENT_ID=staging_oauth_client_id
+GITHUB_CLIENT_SECRET=staging_oauth_client_secret
+GITHUB_WEBHOOK_SECRET=$WEBHOOK_SECRET
+EOF
+
+chmod 600 .env.staging
+ln -sf .env.staging .env
+```
+
+> ⚠️ **Fontos:** A staging és production adatbázis **külön** kell legyen (`openschool_staging` vs `openschool`). Soha ne használj production adatokat staging-en.
+
+### 5. Compose és nginx fájlok
+
+A repóban két dedikált fájl biztosítja a staging működését:
+
+- **`docker-compose.staging.yml`** — önálló compose fájl a staging stack-hez (saját projekt neve: `openschool-staging`, saját volume-ok, nincs publikált port — a staging nginx az `openschool-net` hálózaton érhető el a production nginx számára)
+- **`nginx/nginx-staging.conf`** — HTTP-only nginx konfig (nincs SSL — a production nginx terminálja az SSL-t)
+
+Ezek a fájlok már a repóban vannak, nem kell létrehozni.
+
+### 6. Production konfig frissítése
+
+A production stack-et is frissíteni kell, hogy a staging-et kiszolgálja:
+
+#### `docker-compose.prod.yml` — hálózat hozzáadása
+
+Az nginx szolgáltatás csatlakozzon az `openschool-net` hálózathoz is:
+
+```yaml
+nginx:
+  # ... meglévő konfig ...
+  networks:
+    - default
+    - openschool-net
+
+networks:
+  openschool-net:
+    external: true
+```
+
+#### `nginx/nginx.conf` — staging proxy blokkok
+
+A production nginx-hez két új server blokk kell (HTTP + HTTPS) a staging domainhez:
+
+```nginx
+# HTTP — staging health + redirect
+server {
+    listen 80;
+    server_name staging.yourdomain.com;
+
+    resolver 127.0.0.11 valid=30s ipv6=off;
+    set $staging_backend http://openschool-staging-nginx-1;
+
+    location /health {
+        proxy_pass $staging_backend;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# HTTPS — staging proxy
+server {
+    listen 443 ssl;
+    server_name staging.yourdomain.com;
+
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    resolver 127.0.0.11 valid=30s ipv6=off;
+    set $staging_backend http://openschool-staging-nginx-1;
+
+    location / {
+        proxy_pass $staging_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+> A `resolver 127.0.0.11` a Docker belső DNS-e. A `set $staging_backend` változóval oldja meg az nginx, hogy a staging konténer DNS neve runtime-ban legyen feloldva (nem induláskor).
+
+### 7. DNS konfiguráció
+
+Hozz létre egy `A` rekordot a staging subdomainhez:
+
+```
+staging.yourdomain.com  →  A  →  VPS_IP
+```
+
+Ha Cloudflare-t használsz: először állítsd **DNS only** módra (szürke felhő) az SSL tanúsítvány igényléshez, utána kapcsold **Proxied**-re.
+
+### 8. SSL tanúsítvány bővítése
+
+A meglévő Let's Encrypt tanúsítványt ki kell bővíteni a staging domainnel:
+
+```bash
+# Production nginx leállítása (80-as port felszabadítása)
+cd /opt/openschool
+docker compose -f docker-compose.prod.yml stop nginx
+
+# Tanúsítvány bővítése az --expand kapcsolóval
+sudo certbot certonly --standalone \
+  -d yourdomain.com \
+  -d staging.yourdomain.com \
+  --expand
+
+# Production nginx újraindítása
+docker compose -f docker-compose.prod.yml start nginx
+```
+
+> A `--expand` kapcsoló a meglévő tanúsítványhoz adja hozzá az új domaint, nem cseréli le. Cloudflare használata esetén ideiglenesen ki kell kapcsolni a proxyt (DNS only), majd az igénylés után vissza kell kapcsolni.
+
+### 9. Production újraindítása
+
+A hálózati és nginx változtatások után újra kell indítani a production stack-et:
+
+```bash
+cd /opt/openschool
+git pull origin main
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+### 10. Staging indítása
+
+```bash
+cd /opt/openschool-staging
+
+# Staging konténerek buildelése és indítása
+docker compose -f docker-compose.staging.yml --env-file .env.staging up --build -d
+
+# Migráció futtatása
+docker compose -f docker-compose.staging.yml --env-file .env.staging exec -T backend alembic upgrade head
+
+# Ellenőrzés
+curl -f https://staging.yourdomain.com/health
+# → {"status": "ok"}
+```
+
+> Ha az Alembic `DuplicateTable` hibát ad (mert a SQLAlchemy modellek már létrehozták a táblákat), futtasd: `docker compose -f docker-compose.staging.yml --env-file .env.staging exec -T backend alembic stamp head`
+
+### 11. Deploy folyamat
+
+A staging deploy a `develop` branch-ről történik:
+
+```bash
+cd /opt/openschool-staging
+git pull origin develop
+docker compose -f docker-compose.staging.yml --env-file .env.staging up --build -d
+docker compose -f docker-compose.staging.yml --env-file .env.staging exec -T backend alembic upgrade head
+curl -f https://staging.yourdomain.com/health
+```
+
+**CD pipeline staging deploy-jal (opcionális):**
+
+```yaml
+# .github/workflows/cd.yml — staging job hozzáadása
+staging-deploy:
+  runs-on: ubuntu-latest
+  needs: test
+  if: github.ref == 'refs/heads/develop' && vars.STAGING_HOST != ''
+  environment: staging
+  steps:
+    - name: Deploy to staging
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ vars.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USER }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        script: |
+          set -e
+          cd /opt/openschool-staging
+          git pull origin develop
+          docker compose -f docker-compose.staging.yml --env-file .env.staging up --build -d
+          docker compose -f docker-compose.staging.yml --env-file .env.staging exec -T backend alembic upgrade head
+          sleep 5
+          curl -f https://staging.yourdomain.com/health
+          echo "Staging deploy successful!"
+```
+
+Ehhez a GitHub repo-ban be kell állítani:
+- **Environment:** `staging` (Settings > Environments)
+- **Variables:** `STAGING_HOST`
+- **Secrets:** `STAGING_USER`, `STAGING_SSH_KEY`
+
+### 12. Migráció tesztelés staging-en
+
+A staging elsődleges célja az adatbázis migrációk tesztelése éles deploy előtt:
+
+1. **Migráció generálása** a fejlesztői gépen (`alembic revision --autogenerate`)
+2. **PR nyitása** `develop`-ra → CI futtatja a teszteket
+3. **Merge `develop`-ba** → staging deploy (manuális vagy automatikus)
+4. **Migráció futtatása staging-en** → ellenőrzés, hogy sikeres-e
+5. **Funkcionális teszt** staging-en (manuális)
+6. **Merge `main`-be** → production deploy
+
+### 13. Staging vs Production összehasonlítás
+
+| Szempont | Staging | Production |
+|----------|---------|------------|
+| Branch | `develop` | `main` |
+| Domain | `staging.yourdomain.com` | `yourdomain.com` |
+| Compose fájl | `docker-compose.staging.yml` | `docker-compose.prod.yml` |
+| Nginx konfig | `nginx-staging.conf` (HTTP only) | `nginx.conf` (SSL + staging proxy) |
+| Adatbázis | `openschool_staging` | `openschool` |
+| GitHub OAuth | Külön app | Külön app |
+| `ENVIRONMENT` | `staging` | `production` |
+| Swagger UI | Elérhető (`/docs`) | Letiltva |
+| SSL | Production nginx terminálja | Közvetlen Let's Encrypt |
+| Hálózat | `openschool-net` (prod nginx-hez) | `openschool-net` + default |
+| Deploy | Manuális / develop push | Automatikus main push |
+| Cél | Tesztelés, review | Felhasználói forgalom |
 
 ---
 
