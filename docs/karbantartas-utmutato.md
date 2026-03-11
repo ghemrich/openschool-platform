@@ -37,7 +37,10 @@ chore: karbantartás, függőségek
 ci: CI/CD pipeline változások
 refactor: kód átstrukturálás
 test: teszt hozzáadás/módosítás
+security: biztonsági javítás
 ```
+
+> **Fontos:** Ezeket a prefixeket a `git-cliff` eszköz használja a `CHANGELOG.md` automatikus generálásához. Részletek: [Fejlesztői útmutató — 9. Változásnapló](fejlesztoi-utmutato.md#9-változásnapló-git-cliff)
 
 ## 2. Függőségkezelés
 

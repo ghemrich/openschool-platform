@@ -1,78 +1,65 @@
-# Changelog
+## [unreleased]
 
-Az OpenSchool Platform változásainak naplója.
+### 🚀 Features
 
-A formátum a [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) alapján készült.
+- Add Module 3 - courses, progress tracking, and dashboard
+- Add Module 4 - certificate system
+- Add Module 5 - frontend with Astro
+- Add Module 6 - production configuration
+- Add Module 7 - open source community files
+- Dynamic BASE_URL for certificate verify links, fix auth callback tests
+- GitHub Classroom integration
+- Add admin panel and update all documentation
 
-## [Unreleased]
+### 🐛 Bug Fixes
 
-### Added
-- **Pagination** — `GET /api/courses` és `GET /api/admin/users` lapozható (`skip`, `limit` paraméterek), `{total, data}` válaszformátum
-- **Sorting** — `GET /api/admin/users` rendezési paraméterek (`sort_by`, `sort_order`)
-- **Mermaid diagramok** — architektúra dokumentáció vizuális diagramokkal (rendszer áttekintés, OAuth flow, ER diagram, CI/CD pipeline)
-- **Tartalomjegyzék** — GitHub Classroom integráció dokumentáció
-- **CHANGELOG.md** — változásnapló
-- **CSS `.progress-wrapper`** — globális flex wrapper stílus haladási sávokhoz
-- **Frontend JS modulok** — `dashboard.js`, `course-detail.js` külön fájlok
+- Ruff formatting fixes
+- Alembic migration for users table, env.py model import, lint fixes
+- Fix frontend tsconfig.json and add env.d.ts type reference
+- Skip CD deploy when VPS secrets are not configured
+- Docker testing fixes and UI improvements
+- PDF download sends auth header via fetch instead of plain link
+- Consistent nav button spacing for auth links
+- Resolve all ruff lint errors
 
-### Changed
-- **Frontend JS kiemelés** — Dashboard és kurzus részletek inline `<script>` tartalma külön JS fájlokba kiemelve (`src/lib/dashboard.js`, `src/lib/course-detail.js`)
-- **CSS deduplikáció** — Dashboard haladási sávok inline stílusai lecserélve globális CSS osztályokra (`.progress-bar`, `.progress-bar-fill`)
-- **Frontend pagináció** — index, kurzuslista, admin kurzusok, admin felhasználók oldalak frissítve az új `{total, data}` válaszformátumhoz
-- **Type hints** — `update_progress_for_user()` visszatérési típus hozzáadva (`-> None`)
+### 💼 Other
 
-## [e7e3ea0] - Refaktor I.
+- Add labels and help text to admin course form fields
 
-### Changed
-- **Teszt fixture-ök** — duplikált fixture-ök összevonva `conftest.py`-ba (~200 sor törölve)
-- **Progress service** — `count_progress()` kiemelve `services/progress.py`-ba
-- **N+1 query** — `joinedload(Enrollment.user)` hozzáadva `course_students` endpointhoz
-- **Webhook hibakezelés** — try/except + rollback a webhook commit-nál
-- **Logging** — naplózás hozzáadva certificate, pdf, qr, github service-ekhez
-- **Hibaüzenetek** — angol nyelvre egységesítve
-- **`.env.example`** — dokumentálva az összes konfigurációs változó
-- **Footer** — dinamikus év `new Date().getFullYear()`-ral
+### 🚜 Refactor
 
-## [03c7bce] - Staging környezet
+- Deduplicate test fixtures, extract progress service, fix N+1 query
+- Pagination, sorting, JS extraction, CSS dedup, Mermaid diagrams, CHANGELOG
 
-### Added
-- Staging deploy részletes útmutató a telepítési dokumentációban (8 alfejezet)
-- `staging-deploy` job a CD pipeline-ban (develop ág → staging szerver)
+### 📚 Documentation
 
-## [5810027] - Karbantartás
+- Magyar nyelvű dokumentáció (telepítés, architektúra, jövőkép)
+- Fejlesztői környezet útmutató és dev tooling
+- Rewrite README as introductory page with philosophy
+- Add inter-doc navigation and fix issues
+- Add documentation index to README
+- Add open source philosophy to README
+- Refine README intro
+- Add user guide, fix course detail nginx routing
+- Add GitHub Classroom integration guide for teachers
+- Update roadmap to reflect current project state
+- Replace course list with setup guide in roadmap
+- Replace inline setup guide with link to classroom doc
+- Remove references to external ../testing/ scripts
+- Remove grade calculator from roadmap
+- Add maintenance guide and Dependabot config
+- Expand staging environment guide, add staging CD job
 
-### Added
-- `docs/karbantartas-utmutato.md` — 9 szekciós karbantartási útmutató
-- `.github/dependabot.yml` — pip heti, github-actions havi frissítések
-- Navigációs sáv minden dokumentumban frissítve
+### ⚙️ Miscellaneous Tasks
 
-## [372d8d0] - CI/CD frissítés
+- Rebrand DevSchool to OpenSchool
+- Update pinned dependencies to installed versions
+- Update actions to Node.js 24 compatible versions
 
-### Changed
-- GitHub Actions `actions/checkout@v5`, `actions/setup-python@v6` (Node.js 24 kompatibilis)
+### 🛡️ Security
 
-## [0f0f490] - Lint javítások
+- Production hardening and documentation overhaul
 
-### Fixed
-- 11 ruff lint hiba javítva (üres except, f-string, felesleges import)
+### ◀️ Revert
 
-## [331976a] - Függőségek
-
-### Changed
-- 12 pinned verzió frissítve a ténylegesen telepített verziókra
-- `ruff` hozzáadva dev függőségként
-
-## [5053949] - Biztonsági hardening
-
-### Added
-- CORS konfiguráció (`.env`-ből olvasott origin lista)
-- Token fragment alapú autentikáció (`/login#token=...`)
-- `/api/auth/refresh` endpoint (httpOnly cookie)
-- Globális exception handler naplózással
-- Strukturált logging (environment-függő szint)
-- nginx biztonsági headerek (X-Frame-Options, CSP, stb.)
-- CI lint lépés (ruff)
-- CD teszt kapu (tesztek futnak deploy előtt)
-
-### Changed
-- Dockerfile `--reload` flag eltávolítva produkcióban
+- Restore previous README.md

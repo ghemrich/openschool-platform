@@ -248,7 +248,71 @@ make format   # javítás
 
 ---
 
-## 9. Tesztelés (pytest)
+## 9. Változásnapló (git-cliff)
+
+A projekt [git-cliff](https://git-cliff.org/)-et használja a `CHANGELOG.md` automatikus generálásához a commit történetből. A conventional commit prefixek (`feat:`, `fix:`, `refactor:`, stb.) alapján csoportosítja a változásokat.
+
+### Konfiguráció
+
+A beállítások a `cliff.toml` fájlban vannak a projekt gyökerében. A konfiguráció határozza meg:
+
+| Beállítás | Leírás |
+|-----------|--------|
+| `commit_parsers` | Commit prefix → kategória hozzárendelés (🚀 Features, 🐛 Bug Fixes, stb.) |
+| `conventional_commits` | Conventional commit formátum értelmezése |
+| `sort_commits` | Commit sorrend a changelog-ban |
+| `postprocessors` | `<REPO>` placeholder cseréje a GitHub URL-re |
+
+### Felismert commit prefixek
+
+| Prefix | Kategória |
+|--------|-----------|
+| `feat:` | 🚀 Features |
+| `fix:` | 🐛 Bug Fixes |
+| `refactor:` | 🚜 Refactor |
+| `docs:` | 📚 Documentation |
+| `test:` | 🧪 Testing |
+| `perf:` | ⚡ Performance |
+| `chore:`, `ci:` | ⚙️ Miscellaneous Tasks |
+| `security:` | 🛡️ Security |
+| `revert:` | ◀️ Revert |
+
+### Használat
+
+```bash
+# CHANGELOG.md újragenerálása a teljes commit történetből
+git-cliff -o CHANGELOG.md
+
+# Előnézet (stdout-ra, fájl módosítás nélkül)
+git-cliff
+
+# Csak az utolsó tag óta történt változások
+git-cliff --latest
+
+# Csak az unreleased változások
+git-cliff --unreleased
+```
+
+### Mikor kell futtatni?
+
+A `CHANGELOG.md`-t **nem kell minden commitnál** frissíteni. Az ajánlott munkafolyamat:
+
+1. Fejlesztés során használj conventional commit prefixeket (lásd [Karbantartás — Commit konvenciók](karbantartas-utmutato.md))
+2. Release előtt futtasd: `git-cliff -o CHANGELOG.md`
+3. Commitold a frissített CHANGELOG-ot a release commit részeként
+4. Tageld a release-t: `git tag v1.0.0`
+
+### Telepítés
+
+Ha a `git-cliff` nincs telepítve a gépen:
+
+```bash
+pip install git-cliff
+```
+
+---
+
+## 10. Tesztelés (pytest)
 
 ### Tesztek futtatása
 
@@ -303,7 +367,7 @@ def test_list_courses_public(client):
 
 ---
 
-## 10. Adatbázis és migrációk (Alembic)
+## 11. Adatbázis és migrációk (Alembic)
 
 ### Migráció létrehozása
 
@@ -339,7 +403,7 @@ backend/alembic/versions/
 
 ---
 
-## 11. Docker fejlesztés
+## 12. Docker fejlesztés
 
 ### Szolgáltatások indítása
 
@@ -389,13 +453,14 @@ docker compose up --build -d
 
 ---
 
-## 12. Projektstruktúra
+## 13. Projektstruktúra
 
 ```
 openschool-platform/
 ├── .editorconfig              # Szerkesztő beállítások
 ├── .env.example               # Környezeti változók mintája
 ├── .github/
+│   ├── dependabot.yml         # Dependabot konfig
 │   ├── pull_request_template.md
 │   └── workflows/
 │       ├── ci.yml             # CI: tesztek futtatása
@@ -404,8 +469,12 @@ openschool-platform/
 ├── .vscode/
 │   ├── extensions.json        # Ajánlott VS Code kiegészítők
 │   └── settings.json          # Workspace beállítások
-├── Makefile                   # Fejlesztői parancsok
+├── CHANGELOG.md               # Automatikus változásnapló (git-cliff)
 ├── CONTRIBUTING.md            # Hozzájárulási útmutató
+├── LICENSE                    # MIT licenc
+├── Makefile                   # Fejlesztői parancsok
+├── README.md                  # Projekt leírás
+├── cliff.toml                 # git-cliff konfiguráció
 ├── docker-compose.yml         # Lokális Docker környezet
 ├── docker-compose.prod.yml    # Éles Docker környezet
 │
@@ -424,16 +493,20 @@ openschool-platform/
 │   │   │   ├── courses.py     # CRUD + beiratkozás
 │   │   │   ├── dashboard.py   # Haladás
 │   │   │   └── webhooks.py    # GitHub webhookok
-│   │   └── services/          # Üzleti logika (PDF, QR, GitHub)
+│   │   ├── services/          # Üzleti logika (PDF, QR, GitHub, progress)
 │   ├── tests/                 # Pytest tesztek
+│   │   └── conftest.py        # Közös test fixture-ök
 │   ├── pyproject.toml         # Ruff + pytest konfig
 │   └── requirements.txt       # Python függőségek
 │
 ├── frontend/
 │   ├── src/
+│   │   ├── components/        # Astro komponensek
 │   │   ├── layouts/           # Astro layout-ok
-│   │   └── pages/             # Oldalak (routing)
-│       ├── admin/         # Admin oldalak (dashboard, users, courses)
+│   │   ├── lib/               # Kliens oldali JS modulok
+│   │   ├── pages/             # Oldalak (routing)
+│   │   │   └── admin/         # Admin oldalak (dashboard, users, courses)
+│   │   └── styles/            # CSS stílusok
 │   ├── public/                # Statikus fájlok
 │   ├── astro.config.mjs       # Astro konfiguráció
 │   ├── package.json           # Node.js függőségek
@@ -442,16 +515,26 @@ openschool-platform/
 ├── nginx/
 │   └── nginx.conf             # Nginx reverse proxy konfig
 │
+├── scripts/
+│   └── backup.sh              # Biztonsági mentés szkript
+│
+├── tesztek/                   # Kurzus tesztek (modul-01..07)
+│   ├── conftest.py
+│   └── modul-01..07/
+│
 └── docs/
-    ├── architektura.md           # Rendszer architektúra
-│   ├── fejlesztoi-utmutato.md   # ← Ez a dokumentum
-    ├── jovokep-es-fejlesztesi-terv.md
-    └── telepitesi-utmutato.md    # Üzemeltetési útmutató
+    ├── architektura.md               # Rendszer architektúra
+    ├── fejlesztoi-utmutato.md        # ← Ez a dokumentum
+    ├── felhasznaloi-utmutato.md      # Felhasználói útmutató
+    ├── github-classroom-integraciot.md # GitHub Classroom integráció
+    ├── jovokep-es-fejlesztesi-terv.md # Jövőkép és fejlesztési terv
+    ├── karbantartas-utmutato.md      # Karbantartási útmutató
+    └── telepitesi-utmutato.md        # Üzemeltetési útmutató
 ```
 
 ---
 
-## 13. Fejlesztési munkafolyamat
+## 14. Fejlesztési munkafolyamat
 
 ### Új funkció hozzáadása (példa)
 
@@ -516,7 +599,7 @@ chore: update dependencies
 
 ---
 
-## 14. CI/CD pipeline
+## 15. CI/CD pipeline
 
 ### CI (minden push és PR esetén)
 
@@ -554,7 +637,7 @@ Ha a CI piros:
 
 ---
 
-## 15. Logok és hibakeresés
+## 16. Logok és hibakeresés
 
 ### Backend logok
 
@@ -618,7 +701,7 @@ docker compose exec backend alembic current
 
 ---
 
-## 15. Makefile parancsok összefoglalása
+## 17. Makefile parancsok összefoglalása
 
 ```bash
 make dev-setup     # Teljes fejlesztői környezet felállítása
