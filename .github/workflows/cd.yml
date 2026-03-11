@@ -32,10 +32,10 @@ jobs:
             set -e
             cd /opt/openschool-staging
             git pull origin develop
-            docker compose -f docker-compose.prod.yml --env-file .env.staging up --build -d
-            docker compose -f docker-compose.prod.yml --env-file .env.staging exec -T backend alembic upgrade head
+            docker compose -f docker-compose.staging.yml --env-file .env.staging up --build -d
+            docker compose -f docker-compose.staging.yml --env-file .env.staging exec -T backend alembic upgrade head
             sleep 5
-            curl -f http://localhost:8000/health
+            docker compose -f docker-compose.staging.yml --env-file .env.staging exec -T backend curl -f http://localhost:8000/health
             echo "Staging deploy successful!"
       - uses: actions/checkout@v6
       - name: Discord notification
