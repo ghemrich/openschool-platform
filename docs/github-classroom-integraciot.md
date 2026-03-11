@@ -1,6 +1,6 @@
 # OpenSchool Platform — GitHub Classroom integráció
 
-> 📖 **Dokumentáció:** [Főoldal](../README.md) · [Architektúra](architektura.md) · [Telepítés](telepitesi-utmutato.md) · [Fejlesztői útmutató](fejlesztoi-utmutato.md) · [Backend](backend-fejlesztes.md) · [Frontend](frontend-fejlesztes.md) · [Roadmap](jovokep-es-fejlesztesi-terv.md) · [Felhasználói útmutató](felhasznaloi-utmutato.md) · **GitHub Classroom** · [Karbantartás](karbantartas-utmutato.md) · [Automatizálás](automatizalas-beallitas.md) · [Hozzájárulás](../CONTRIBUTING.md)
+> 📖 **Dokumentáció:** [Főoldal](../README.md) · [Architektúra](architektura.md) · [Telepítés](telepitesi-utmutato.md) · [Fejlesztői útmutató](fejlesztoi-utmutato.md) · [Backend](backend-fejlesztes.md) · [Frontend](frontend-fejlesztes.md) · [Roadmap](jovokep-es-fejlesztesi-terv.md) · [Felhasználói útmutató](felhasznaloi-utmutato.md) · **GitHub Classroom** · [Karbantartás](karbantartas-utmutato.md) · [Automatizálás](automatizalas-beallitas.md) · [Discord](discord-integracio.md) · [Dokumentálás](dokumentacios-utmutato.md) · [Hozzájárulás](../CONTRIBUTING.md)
 
 Ez a dokumentum lépésről lépésre leírja, hogyan kell egy GitHub Classroom-ban létrehozott feladatot összekötni az OpenSchool platformmal, és hogyan működik az automatikus értékelés.
 

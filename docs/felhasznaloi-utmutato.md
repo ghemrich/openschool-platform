@@ -1,6 +1,6 @@
 # OpenSchool Platform — Felhasználói útmutató
 
-> 📖 **Dokumentáció:** [Főoldal](../README.md) · [Architektúra](architektura.md) · [Telepítés](telepitesi-utmutato.md) · [Fejlesztői útmutató](fejlesztoi-utmutato.md) · [Backend](backend-fejlesztes.md) · [Frontend](frontend-fejlesztes.md) · [Roadmap](jovokep-es-fejlesztesi-terv.md) · **Felhasználói útmutató** · [GitHub Classroom](github-classroom-integraciot.md) · [Karbantartás](karbantartas-utmutato.md) · [Automatizálás](automatizalas-beallitas.md) · [Hozzájárulás](../CONTRIBUTING.md)
+> 📖 **Dokumentáció:** [Főoldal](../README.md) · [Architektúra](architektura.md) · [Telepítés](telepitesi-utmutato.md) · [Fejlesztői útmutató](fejlesztoi-utmutato.md) · [Backend](backend-fejlesztes.md) · [Frontend](frontend-fejlesztes.md) · [Roadmap](jovokep-es-fejlesztesi-terv.md) · **Felhasználói útmutató** · [GitHub Classroom](github-classroom-integraciot.md) · [Karbantartás](karbantartas-utmutato.md) · [Automatizálás](automatizalas-beallitas.md) · [Discord](discord-integracio.md) · [Dokumentálás](dokumentacios-utmutato.md) · [Hozzájárulás](../CONTRIBUTING.md)
 
 Ez a dokumentum leírja, hogy az OpenSchool platform felülete hogyan működik: milyen oldalak vannak, mit csinálnak a gombok, és hogyan zajlik a tanulási folyamat a beiratkozástól a tanúsítványig.
 

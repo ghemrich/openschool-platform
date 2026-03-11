@@ -175,6 +175,8 @@ Szívesen fogadjuk a hozzájárulásokat! Olvasd el a [CONTRIBUTING.md](CONTRIBU
 | [GitHub Classroom integráció](docs/github-classroom-integraciot.md) | Feladatok összekötése, repo_prefix, webhook, tanári útmutató |
 | [Karbantartás](docs/karbantartas-utmutato.md) | Függőségkezelés, monitoring, backup, biztonsági audit, incidenskezelés |
 | [Automatizálás](docs/automatizalas-beallitas.md) | Cron job-ok, VPS bootstrap, Discord értesítések, secrets kezelés |
+| [Discord integráció](docs/discord-integracio.md) | Discord szerver, webhook, CI/CD értesítések, csatornastruktúra |
+| [Dokumentálás](docs/dokumentacios-utmutato.md) | Docstring-ek, API docs, Markdown konvenciók, navsáv, CHANGELOG |
 | [Hozzájárulás](CONTRIBUTING.md) | Fork, branch stratégia, PR küldés, kódstílus |
 
 A `good first issue` címkéjű [issue-k](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) ideálisak kezdőknek.

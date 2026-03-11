@@ -30,6 +30,7 @@
 
 - Deduplicate test fixtures, extract progress service, fix N+1 query
 - Pagination, sorting, JS extraction, CSS dedup, Mermaid diagrams, CHANGELOG
+- Project quality improvements
 
 ### 📚 Documentation
 
@@ -49,12 +50,19 @@
 - Remove grade calculator from roadmap
 - Add maintenance guide and Dependabot config
 - Expand staging environment guide, add staging CD job
+- Add git-cliff changelog automation and update project structure
+- Fix content inconsistencies across all documentation
+- Restructure into separate backend/frontend guides
 
 ### ⚙️ Miscellaneous Tasks
 
 - Rebrand DevSchool to OpenSchool
 - Update pinned dependencies to installed versions
 - Update actions to Node.js 24 compatible versions
+- Add git-cliff to requirements.txt
+- Split requirements into prod and dev
+- Add automated maintenance scripts and documentation
+- Automate VPS setup and security checklist
 
 ### 🛡️ Security
 

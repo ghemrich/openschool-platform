@@ -1,6 +1,6 @@
 # Fejlesztői útmutató
 
-> 📖 **Dokumentáció:** [Főoldal](../README.md) · [Architektúra](architektura.md) · [Telepítés](telepitesi-utmutato.md) · **Fejlesztői útmutató** · [Backend](backend-fejlesztes.md) · [Frontend](frontend-fejlesztes.md) · [Roadmap](jovokep-es-fejlesztesi-terv.md) · [Felhasználói útmutató](felhasznaloi-utmutato.md) · [GitHub Classroom](github-classroom-integraciot.md) · [Karbantartás](karbantartas-utmutato.md) · [Automatizálás](automatizalas-beallitas.md) · [Hozzájárulás](../CONTRIBUTING.md)
+> 📖 **Dokumentáció:** [Főoldal](../README.md) · [Architektúra](architektura.md) · [Telepítés](telepitesi-utmutato.md) · **Fejlesztői útmutató** · [Backend](backend-fejlesztes.md) · [Frontend](frontend-fejlesztes.md) · [Roadmap](jovokep-es-fejlesztesi-terv.md) · [Felhasználói útmutató](felhasznaloi-utmutato.md) · [GitHub Classroom](github-classroom-integraciot.md) · [Karbantartás](karbantartas-utmutato.md) · [Automatizálás](automatizalas-beallitas.md) · [Discord](discord-integracio.md) · [Dokumentálás](dokumentacios-utmutato.md) · [Hozzájárulás](../CONTRIBUTING.md)
 
 Ez az útmutató a közös fejlesztői környezet felállítását és a megosztott eszközöket írja le. A backend és frontend specifikus részletekért lásd:
 
@@ -406,6 +406,8 @@ openschool-platform/
     ├── architektura.md               # Rendszer architektúra
     ├── automatizalas-beallitas.md     # Automatizálás beállítása
     ├── backend-fejlesztes.md         # Backend fejlesztői útmutató
+    ├── discord-integracio.md         # Discord szerver és webhook integráció
+    ├── dokumentacios-utmutato.md     # Dokumentálási útmutató
     ├── fejlesztoi-utmutato.md        # ← Ez a dokumentum
     ├── felhasznaloi-utmutato.md      # Felhasználói útmutató
     ├── frontend-fejlesztes.md        # Frontend fejlesztői útmutató
@@ -445,15 +447,21 @@ alembic revision --autogenerate -m "add user profile fields"
 # 7. Frontend oldal
 #    → frontend/src/pages/profile.astro
 
-# 8. Ellenőrzés
+# 8. Dokumentáció frissítése
+#    → docstring-ek az új függvényekhez
+#    → README.md API tábla frissítése (ha új végpont)
+#    → docs/ releváns fájlok frissítése
+#    Lásd: docs/dokumentacios-utmutato.md
+
+# 9. Ellenőrzés
 pytest -v                          # tesztek
 ruff check . && ruff format .      # linter + formázás
 
-# 9. Commit (pre-commit hookok automatikusan futnak)
+# 10. Commit (pre-commit hookok automatikusan futnak)
 git add .
 git commit -m "feat: add user profile page"
 
-# 10. Push és PR
+# 11. Push és PR
 git push origin feature/user-profile
 # → GitHub-on Pull Request nyitása develop-ba
 ```

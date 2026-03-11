@@ -1,6 +1,6 @@
 # Hozzájárulás az OpenSchool Platformhoz
 
-> 📖 **Dokumentáció:** [Főoldal](README.md) · [Architektúra](docs/architektura.md) · [Telepítés](docs/telepitesi-utmutato.md) · [Fejlesztői útmutató](docs/fejlesztoi-utmutato.md) · [Backend](docs/backend-fejlesztes.md) · [Frontend](docs/frontend-fejlesztes.md) · [Roadmap](docs/jovokep-es-fejlesztesi-terv.md) · [Felhasználói útmutató](docs/felhasznaloi-utmutato.md) · [GitHub Classroom](docs/github-classroom-integraciot.md) · [Karbantartás](docs/karbantartas-utmutato.md) · [Automatizálás](docs/automatizalas-beallitas.md) · **Hozzájárulás**
+> 📖 **Dokumentáció:** [Főoldal](README.md) · [Architektúra](docs/architektura.md) · [Telepítés](docs/telepitesi-utmutato.md) · [Fejlesztői útmutató](docs/fejlesztoi-utmutato.md) · [Backend](docs/backend-fejlesztes.md) · [Frontend](docs/frontend-fejlesztes.md) · [Roadmap](docs/jovokep-es-fejlesztesi-terv.md) · [Felhasználói útmutató](docs/felhasznaloi-utmutato.md) · [GitHub Classroom](docs/github-classroom-integraciot.md) · [Karbantartás](docs/karbantartas-utmutato.md) · [Automatizálás](docs/automatizalas-beallitas.md) · [Discord](docs/discord-integracio.md) · [Dokumentálás](docs/dokumentacios-utmutato.md) · **Hozzájárulás**
 
 Köszönjük, hogy hozzá szeretnél járulni az OpenSchool fejlesztéséhez! Ez az útmutató segít az indulásban.
 
@@ -120,7 +120,9 @@ Példa: `feat: add user profile page`
 
 - [ ] A tesztek zöldek (`pytest -v`)
 - [ ] A linter nem jelez hibát (`ruff check .`)
-- [ ] A kód dokumentált (ha szükséges)
+- [ ] Új publikus függvényeknek van docstring-jük
+- [ ] Az érintett dokumentáció frissítve van (lásd: [Dokumentálási útmutató](docs/dokumentacios-utmutato.md))
+- [ ] A `README.md` API táblázata és docs indexe naprakész
 - [ ] A PR leírás tartalmazza a változtatás célját
 
 ## Code review

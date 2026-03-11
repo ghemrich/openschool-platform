@@ -1,6 +1,6 @@
 # Karbantartás és minőségbiztosítás
 
-> 📖 **Dokumentáció:** [Főoldal](../README.md) · [Architektúra](architektura.md) · [Telepítés](telepitesi-utmutato.md) · [Fejlesztői útmutató](fejlesztoi-utmutato.md) · [Backend](backend-fejlesztes.md) · [Frontend](frontend-fejlesztes.md) · [Roadmap](jovokep-es-fejlesztesi-terv.md) · [Felhasználói útmutató](felhasznaloi-utmutato.md) · [GitHub Classroom](github-classroom-integraciot.md) · **Karbantartás** · [Automatizálás](automatizalas-beallitas.md) · [Hozzájárulás](../CONTRIBUTING.md)
+> 📖 **Dokumentáció:** [Főoldal](../README.md) · [Architektúra](architektura.md) · [Telepítés](telepitesi-utmutato.md) · [Fejlesztői útmutató](fejlesztoi-utmutato.md) · [Backend](backend-fejlesztes.md) · [Frontend](frontend-fejlesztes.md) · [Roadmap](jovokep-es-fejlesztesi-terv.md) · [Felhasználói útmutató](felhasznaloi-utmutato.md) · [GitHub Classroom](github-classroom-integraciot.md) · **Karbantartás** · [Automatizálás](automatizalas-beallitas.md) · [Discord](discord-integracio.md) · [Dokumentálás](dokumentacios-utmutato.md) · [Hozzájárulás](../CONTRIBUTING.md)
 
 Ez az útmutató a OpenSchool Platform hosszú távú karbantartásához, minőségbiztosításához és üzemeltetéséhez szükséges folyamatokat és gyakorlatokat írja le.
 
