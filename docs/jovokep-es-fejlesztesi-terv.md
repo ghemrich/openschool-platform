@@ -200,14 +200,13 @@ A kurzuskeretrendszer Discord szervert használ a kommunikációhoz, heti szála
 
 ## Külső eszközök integrációja
 
-A kurzuskeretrendszer (`../testing/`) több külső eszközt tartalmaz, amelyek jelenleg CLI szkriptként működnek:
+A platform fejlesztése során a következő külső eszközök integrálása tervezett:
 
-| Eszköz | Leírás | Integráció módja |
-|--------|--------|------------------|
-| `github-setup.sh` | Template repók létrehozása GitHub Organization-ben | Marad CLI — egyszeri beállítás |
-| `discord-webhook.py` | Discord értesítések küldése | Platform beépített funkció lesz |
-| `jegy-szamolo.py` | Félév végi jegy kiszámítása CSV-kből | Platform beépített funkció lesz |
-| GitHub Classroom | Feladatkiadás és autograding | Webhook + API integráció |
+| Eszköz | Leírás | Állapot |
+|--------|--------|--------|
+| GitHub Classroom | Feladatkiadás és autograding | ✅ Webhook + repo_prefix + sync |
+| Discord értesítések | Platform → Discord értesítések küldése | 🔴 Tervezett |
+| Jegykalkulátor | Félév végi jegy kiszámítása | 🟠 Tervezett |
 
 ---
 
