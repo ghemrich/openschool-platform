@@ -86,7 +86,7 @@ Egy új kurzus indításához a GitHub Classroom-ban és az OpenSchool admin pan
 |------|---------|
 | MIT licensz | ✅ |
 | CONTRIBUTING.md (magyar) | ✅ |
-| Issue sablonok (bug, feature) | ✅ |
+| Issue sablonok (bug, feature, documentation, question) | ✅ |
 | PR sablon | ✅ |
 | README.md | ✅ |
 | Makefile | ✅ |

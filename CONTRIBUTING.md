@@ -55,7 +55,7 @@ curl http://localhost:8000/health
 ## Issue-k
 
 - Nézd meg a [meglévő issue-kat](../../issues), mielőtt újat nyitsz
-- Használd az issue template-eket (bug report / feature request)
+- Használd az issue template-eket (bug report / feature request / documentation / question)
 - A `good first issue` címkéjű issue-k ideálisak kezdőknek
 - Mielőtt nagyobb változtatásba kezdesz, nyiss egy issue-t és egyeztessünk
 
