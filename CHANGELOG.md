@@ -10,6 +10,7 @@
 - Dynamic BASE_URL for certificate verify links, fix auth callback tests
 - GitHub Classroom integration
 - Add admin panel and update all documentation
+- *(frontend)* Add GitHub link and site config
 
 ### 🐛 Bug Fixes
 
@@ -67,6 +68,7 @@
 - Remove redundant Makefile section from README
 - Regenerate CHANGELOG.md
 - Remove duplicate Discord channel structure from roadmap
+- Regenerate CHANGELOG.md
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -78,6 +80,8 @@
 - Add automated maintenance scripts and documentation
 - Automate VPS setup and security checklist
 - Add Discord notifications to CI/CD workflows
+- Run CI on pull requests targeting develop branch
+- *(deps)* Bump actions/checkout from v5 to v6
 
 ### 🛡️ Security
 
