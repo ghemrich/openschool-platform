@@ -64,7 +64,7 @@ case "$STATUS" in
         ;;
 esac
 
-# Build JSON payload using a heredoc to avoid injection issues
+# Build JSON payload — construct URL field directly in the heredoc
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
 
 # Sanitize inputs — remove characters that break JSON
@@ -77,9 +77,16 @@ S_REPO=$(sanitize "$REPO")
 S_AUTHOR=$(sanitize "$AUTHOR")
 S_URL=$(sanitize "$URL")
 
+# Build URL line conditionally
+URL_LINE=""
+if [ -n "$S_URL" ]; then
+    URL_LINE="\"url\": \"${S_URL}\","
+fi
+
 PAYLOAD=$(cat <<EOF
 {
   "embeds": [{
+    ${URL_LINE}
     "title": "${EMOJI} ${S_TITLE}",
     "color": ${COLOR},
     "fields": [
@@ -94,13 +101,8 @@ PAYLOAD=$(cat <<EOF
 EOF
 )
 
-# Add URL as embed URL if provided
-if [ -n "$S_URL" ]; then
-    PAYLOAD=$(echo "$PAYLOAD" | sed "s|\"title\": \"${EMOJI}|\"url\": \"${S_URL}\", \"title\": \"${EMOJI}|")
-fi
-
 # --- Send ---------------------------------------------------------------------
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$WEBHOOK_URL" \
+HTTP_CODE=$(curl -s -o /tmp/discord_response.txt -w "%{http_code}" -X POST "$WEBHOOK_URL" \
     -H 'Content-Type: application/json' \
     -d "$PAYLOAD")
 
@@ -108,5 +110,6 @@ if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
     echo "Discord notification sent (HTTP $HTTP_CODE)"
 else
     echo "Discord notification failed (HTTP $HTTP_CODE)" >&2
+    echo "Response: $(cat /tmp/discord_response.txt 2>/dev/null)" >&2
     exit 1
 fi
