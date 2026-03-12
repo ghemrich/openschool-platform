@@ -20,7 +20,7 @@ http {
     # Redirect HTTP to HTTPS (except health check)
     server {
         listen 80;
-        server_name figtest.win;
+        server_name ${PROD_DOMAIN};
 
         location /health {
             proxy_pass http://backend/health;
@@ -34,7 +34,7 @@ http {
     # Staging — HTTP health + redirect + ACME challenge
     server {
         listen 80;
-        server_name staging.figtest.win staging.openschool.hu;
+        server_name staging.${PROD_DOMAIN} ${STAGING_DOMAIN};
 
         resolver 127.0.0.11 valid=30s ipv6=off;
         set $staging_backend http://openschool-staging-nginx-1;
@@ -54,10 +54,10 @@ http {
 
     server {
         listen 443 ssl;
-        server_name figtest.win;
+        server_name ${PROD_DOMAIN};
 
-        ssl_certificate /etc/letsencrypt/live/figtest.win/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/figtest.win/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/${PROD_DOMAIN}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/${PROD_DOMAIN}/privkey.pem;
         ssl_protocols TLSv1.2 TLSv1.3;
         ssl_ciphers HIGH:!aNULL:!MD5;
 
@@ -109,13 +109,13 @@ http {
         }
     }
 
-    # Staging — HTTPS proxy to staging nginx container (figtest.win)
+    # Staging — HTTPS proxy to staging nginx container (Cloudflare domain)
     server {
         listen 443 ssl;
-        server_name staging.figtest.win;
+        server_name staging.${PROD_DOMAIN};
 
-        ssl_certificate /etc/letsencrypt/live/figtest.win/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/figtest.win/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/${PROD_DOMAIN}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/${PROD_DOMAIN}/privkey.pem;
         ssl_protocols TLSv1.2 TLSv1.3;
         ssl_ciphers HIGH:!aNULL:!MD5;
 
@@ -131,13 +131,13 @@ http {
         }
     }
 
-    # Staging — HTTPS proxy to staging nginx container (openschool.hu)
+    # Staging — HTTPS proxy to staging nginx container (custom domain)
     server {
         listen 443 ssl;
-        server_name staging.openschool.hu;
+        server_name ${STAGING_DOMAIN};
 
-        ssl_certificate /etc/letsencrypt/live/staging.openschool.hu/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/staging.openschool.hu/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/${STAGING_DOMAIN}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/${STAGING_DOMAIN}/privkey.pem;
         ssl_protocols TLSv1.2 TLSv1.3;
         ssl_ciphers HIGH:!aNULL:!MD5;
 
