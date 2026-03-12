@@ -47,6 +47,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - frontend_build:/usr/share/nginx/html
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
     depends_on:
       backend:
         condition: service_healthy
