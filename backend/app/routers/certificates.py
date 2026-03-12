@@ -101,8 +101,36 @@ def download_certificate_pdf(
     cert = db.query(Certificate).filter(Certificate.cert_id == cert_id, Certificate.user_id == current_user.id).first()
     if not cert:
         raise HTTPException(status_code=404, detail="Certificate not found")
+
+    # Regenerate PDF if missing (e.g. after container recreate)
     if not cert.pdf_path or not Path(cert.pdf_path).is_file():
-        raise HTTPException(status_code=404, detail="PDF not found")
+        course = db.query(Course).filter(Course.id == cert.course_id).first()
+        if not course:
+            raise HTTPException(status_code=404, detail="PDF not found")
+        try:
+            from app.services.pdf import generate_certificate_pdf
+            from app.services.qr import generate_qr_base64
+
+            verify_url = f"{settings.base_url}/verify/{cert.cert_id}"
+            qr_b64 = generate_qr_base64(verify_url)
+            pdf_bytes = generate_certificate_pdf(
+                name=current_user.username,
+                course_name=course.name,
+                cert_id=cert.cert_id,
+                issued_date=cert.issued_at.strftime("%Y-%m-%d") if cert.issued_at else "",
+                verify_url=verify_url,
+                qr_base64=qr_b64,
+            )
+            CERT_DIR.mkdir(parents=True, exist_ok=True)
+            pdf_path = CERT_DIR / f"{cert.cert_id}.pdf"
+            pdf_path.write_bytes(pdf_bytes)
+            cert.pdf_path = str(pdf_path)
+            db.commit()
+            logger.info("Certificate PDF regenerated: cert_id=%s", cert.cert_id)
+        except Exception:
+            logger.exception("Failed to regenerate certificate PDF: cert_id=%s", cert.cert_id)
+            raise HTTPException(status_code=500, detail="Failed to generate PDF")
+
     return FileResponse(cert.pdf_path, media_type="application/pdf", filename=f"certificate-{cert_id}.pdf")
 
 

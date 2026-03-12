@@ -7,6 +7,8 @@ services:
     build: ./backend
     restart: always
     env_file: .env.staging
+    volumes:
+      - staging_certificates:/app/data/certificates
     depends_on:
       - db
     healthcheck:
@@ -61,6 +63,7 @@ services:
 volumes:
   staging_pgdata:
   staging_frontend_build:
+  staging_certificates:
 
 networks:
   openschool-net:

@@ -5,6 +5,8 @@ services:
     build: ./backend
     restart: always
     env_file: .env.prod
+    volumes:
+      - certificates:/app/data/certificates
     depends_on:
       - db
     healthcheck:
@@ -68,6 +70,7 @@ services:
 volumes:
   pgdata:
   frontend_build:
+  certificates:
 
 networks:
   openschool-net:
