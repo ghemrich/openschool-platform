@@ -363,7 +363,7 @@ Leiratkozás kurzusról.
 
 ### `GET /api/courses/{course_id}/students` *(mentor/admin)*
 
-Beiratkozott diákok listája haladással.
+Beiratkozott tanulók listája haladással.
 
 | | |
 |---|---|

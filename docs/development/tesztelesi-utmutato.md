@@ -13,7 +13,7 @@ A projektben **két különálló tesztcsomag** van:
 | Csomag | Hely | Cél | Futtatás |
 |--------|------|-----|----------|
 | **Backend unit tesztek** | `backend/tests/` | API végpontok, üzleti logika, modellek | `make test` |
-| **Verifikációs tesztek** | `tesztek/` | Diákok projektjének ellenőrzése (labor feladatok) | `pytest tesztek/modul-01/ -v` |
+| **Verifikációs tesztek** | `tesztek/` | Tanulók projektjének ellenőrzése (labor feladatok) | `pytest tesztek/modul-01/ -v` |
 
 ### Backend tesztek (56 db)
 
@@ -28,7 +28,7 @@ A projektben **két különálló tesztcsomag** van:
 
 ### Verifikációs tesztek (7 modul)
 
-Ezek a `tesztek/` mappában találhatók és a diákok projektjének helyességét ellenőrzik — fájlok megléte, Docker futás, API válaszok, stb. A tanár/mentor futtatja vagy a CI pipeline.
+Ezek a `tesztek/` mappában találhatók és a tanulók projektjének helyességét ellenőrzik — fájlok megléte, Docker futás, API válaszok, stb. A mentor/mentor futtatja vagy a CI pipeline.
 
 | Modul | Mit ellenőriz |
 |-------|---------------|
@@ -244,7 +244,7 @@ def test_vedett_vegpont_tokennel(client, student):
 
 
 def test_admin_vegpont_diak_nem_ferhet_hozza(client, student):
-    """Admin végpont — a diák nem érheti el (403 vagy 401)."""
+    """Admin végpont — a tanuló nem érheti el (403 vagy 401)."""
     token = create_access_token(student.id)
     response = client.get(
         "/api/admin/stats",

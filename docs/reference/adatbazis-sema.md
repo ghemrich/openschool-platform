@@ -146,8 +146,8 @@ A feladatok (gyakorlatok), modulokhoz rendelve. Minden feladat opcionálisan egy
 | `id` | Integer | — | autoincrement | Elsődleges kulcs |
 | `module_id` | Integer (FK) | Nem | — | Szülő modul (`modules.id`) |
 | `name` | String | Nem | — | Feladat neve |
-| `repo_prefix` | String | Igen | — | GitHub Classroom repó prefix. A diákok repói `{prefix}-{username}` formátumúak (pl. `python-alapok-hello-diak1`). A webhook és a sync-progress ezzel egyezteti a feladatot |
-| `classroom_url` | String | Igen | — | GitHub Classroom assignment link (pl. `https://classroom.github.com/a/abc123`). A frontend megjeleníti — erre kattintva a diák elfogadja a feladatot |
+| `repo_prefix` | String | Igen | — | GitHub Classroom repó prefix. A tanulók repói `{prefix}-{username}` formátumúak (pl. `python-alapok-hello-diak1`). A webhook és a sync-progress ezzel egyezteti a feladatot |
+| `classroom_url` | String | Igen | — | GitHub Classroom assignment link (pl. `https://classroom.github.com/a/abc123`). A frontend megjeleníti — erre kattintva a tanuló elfogadja a feladatot |
 | `order` | Integer | Igen | `0` | Megjelenítési sorrend a modulon belül |
 | `required` | Boolean | Nem | `true` | Ha `true`, a feladat teljesítése szükséges a tanúsítvány kiállításához. Ha `false`, opcionális (nem számít a befejezettségbe) |
 

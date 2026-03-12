@@ -3,7 +3,7 @@
 [![CI](https://github.com/ghemrich/openschool-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/ghemrich/openschool-platform/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Nyílt forráskódú oktatási platform, ahol a diákok valódi fejlesztői eszközökkel tanulnak programozni.
+Nyílt forráskódú oktatási platform, ahol a tanulók valódi fejlesztői eszközökkel tanulnak programozni.
 
 > **Az open source nem feature — az open source a tanterv.**
 
@@ -80,7 +80,7 @@ Szívesen fogadjuk a hozzájárulásokat! Olvasd el a [CONTRIBUTING.md](CONTRIBU
 |---|---|
 | [Karbantartás](docs/operations/karbantartas-utmutato.md) | Monitoring, backup, biztonsági audit |
 | [Automatizálás](docs/operations/automatizalas-beallitas.md) | Cron jobok, VPS bootstrap, secrets kezelés |
-| [GitHub Classroom](docs/integrations/github-classroom-integraciot.md) | Feladatok összekötése, webhook, tanári útmutató |
+| [GitHub Classroom](docs/integrations/github-classroom-integraciot.md) | Feladatok összekötése, webhook, mentori útmutató |
 | [Discord](docs/integrations/discord-integracio.md) | Discord szerver, webhook, CI/CD értesítések |
 
 ### 📖 Útmutatók

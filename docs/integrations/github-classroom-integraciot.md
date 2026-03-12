@@ -138,7 +138,7 @@ A tanuló szemszögéből:
 | Lépés | Ki csinálja | Hol |
 |---|---|---|
 | Kurzus/modul létrehozása | Admin | OpenSchool admin panel |
-| Assignment létrehozása | Tanár | GitHub Classroom |
+| Assignment létrehozása | Mentor | GitHub Classroom |
 | Feladat hozzárendelése (`repo_prefix` + `classroom_url`) | Admin | OpenSchool admin panel |
 | Beiratkozás kurzusra | Tanuló | OpenSchool frontend |
 | Assignment elfogadása | Tanuló | GitHub Classroom link |
@@ -153,7 +153,7 @@ A tanuló szemszögéből:
 
 A jelenlegi rendszerben az alábbiak **nem** automatikusak:
 
-1. **Nincs automatikus assignment szinkronizálás** — Ha a tanár létrehoz egy új assignment-et a GitHub Classroom-ban, azt manuálisan kell felvenni az OpenSchool admin panelen is (`repo_prefix` + `classroom_url`). A platform nem kérdezi le a Classroom API-t.
+1. **Nincs automatikus assignment szinkronizálás** — Ha a mentor létrehoz egy új assignment-et a GitHub Classroom-ban, azt manuálisan kell felvenni az OpenSchool admin panelen is (`repo_prefix` + `classroom_url`). A platform nem kérdezi le a Classroom API-t.
 
 2. **Nincs automatikus beiratkozás** — Ha egy tanuló elfogad egy Classroom assignment-et, az nem jelenti, hogy az OpenSchool-ban is be van iratkozva. A két rendszerben külön kell beiratkozni.
 

@@ -42,9 +42,9 @@ A közösségi funkciók szálakat (threads), fórumokat és moderációs eszkö
 | Szerepkör | Szín | Jogosultságok |
 |-----------|------|---------------|
 | `@Admin` | Piros | Minden jogosultság |
-| `@Tanár` | Kék | Üzenetek kezelése, szálak létrehozása, pinelés |
+| `@Mentor` | Kék | Üzenetek kezelése, szálak létrehozása, pinelés |
 | `@Mentor` | Zöld | Szálak létrehozása, reakciók kezelése |
-| `@Diák` | Szürke | Üzenetek küldése, szálak használata |
+| `@Tanuló` | Szürke | Üzenetek küldése, szálak használata |
 | `@Bot` | Sárga | Webhookok, üzenetek küldése |
 
 Beállítás: **Szerver beállítások → Szerepkörök → Új szerepkör**
@@ -58,7 +58,7 @@ Az ajánlott csatornastruktúra kurzusonként bővíthető:
 ```
 📋 INFORMÁCIÓK
   #szabályzat          — szerver szabályok, magatartási kódex
-  #közlemények          — fontos értesítések (csak admin/tanár írhat)
+  #közlemények          — fontos értesítések (csak admin/mentor írhat)
   #hasznos-linkek      — dokumentáció, repó, eszközök linkjei
 
 🐍 PYTHON ALAPOK  (példa kurzus)
@@ -255,8 +255,8 @@ A jövőben egy Discord bot biztosíthatja a kétirányú integrációt:
 
 | Funkció | Leírás |
 |---------|--------|
-| Beiratkozás értesítés | Diák beiratkozott → üzenet a kurzus csatornán |
-| Tanúsítvány értesítés | Diák elvégezte a kurzust → gratulálás |
+| Beiratkozás értesítés | Tanuló beiratkozott → üzenet a kurzus csatornán |
+| Tanúsítvány értesítés | Tanuló elvégezte a kurzust → gratulálás |
 | Kurzus létrehozás | Új kurzus → automatikus csatornák létrehozása |
 | Heti szálak | Automatikus heti Q&A szál indítása |
 | `/status` parancs | Bot parancs a szerver/platform állapotának lekérdezéséhez |

@@ -142,7 +142,7 @@ User ──┬── Enrollment ── Course ── Module ── Exercise
 | Szerepkör | Jogosultságok |
 |-----------|---------------|
 | `student` | Beiratkozás kurzusokra, haladás megtekintése, tanúsítvány igénylése |
-| `mentor` | Minden, amit a student + diákok haladásának megtekintése |
+| `mentor` | Minden, amit a student + tanulók haladásának megtekintése |
 | `admin` | Minden + kurzusok/modulok/feladatok CRUD, felhasználók kezelése, admin panel |
 
 ---
@@ -175,7 +175,7 @@ Minden router a `backend/app/routers/` mappában van és a `main.py`-ban regiszt
 | `/api/courses/{id}/modules/{mid}/exercises` | POST | admin | Feladat hozzáadása |
 | `/api/courses/{id}/enroll` | POST | user | Beiratkozás |
 | `/api/courses/{id}/unenroll` | POST | user | Leiratkozás |
-| `/api/courses/{id}/students` | GET | mentor | Diákok listája haladással |
+| `/api/courses/{id}/students` | GET | mentor | Tanulók listája haladással |
 
 ### `dashboard.py` — Felhasználói haladás
 

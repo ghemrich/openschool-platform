@@ -47,20 +47,20 @@ Minden publikus függvénynek, osztálynak és modulnak legyen docstring-je. A G
 
 ```python
 def enroll_student(db: Session, user_id: int, course_id: int) -> Enrollment:
-    """Beiratkoztat egy diákot egy kurzusra.
+    """Beiratkoztat egy tanulót egy kurzusra.
 
-    Ellenőrzi, hogy a diák nincs-e már beiratkozva. Ha igen, HTTPException-t dob.
+    Ellenőrzi, hogy a tanuló nincs-e már beiratkozva. Ha igen, HTTPException-t dob.
 
     Args:
         db: Adatbázis session.
-        user_id: A diák azonosítója.
+        user_id: A tanuló azonosítója.
         course_id: A kurzus azonosítója.
 
     Returns:
         Az új Enrollment objektum.
 
     Raises:
-        HTTPException: 409, ha a diák már beiratkozott.
+        HTTPException: 409, ha a tanuló már beiratkozott.
     """
 ```
 
@@ -203,7 +203,7 @@ docs/
 │   ├── karbantartas-utmutato.md    # Karbantartási eljárások
 │   └── automatizalas-beallitas.md  # VPS automatizálás, cron, monitoring
 ├── integrations/
-│   ├── github-classroom-integraciot.md  # GitHub Classroom tanári útmutató
+│   ├── github-classroom-integraciot.md  # GitHub Classroom mentori útmutató
 │   └── discord-integracio.md       # Discord szerver, webhook, bot
 ├── guides/
 │   ├── felhasznaloi-utmutato.md    # Felhasználói útmutató (UI, funkciók)

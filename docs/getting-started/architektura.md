@@ -4,11 +4,11 @@
 
 ## Rendszer áttekintés
 
-Az OpenSchool egy oktatási platform, ahol a diákok valódi fejlesztői munkafolyamatokon keresztül tanulnak programozni. A platform kurzusokat kezel, követi a haladást, GitHub-bal integrálódik az azonosításhoz és a CI-alapú értékeléshez, valamint hitelesíthető tanúsítványokat állít ki.
+Az OpenSchool egy oktatási platform, ahol a tanulók valódi fejlesztői munkafolyamatokon keresztül tanulnak programozni. A platform kurzusokat kezel, követi a haladást, GitHub-bal integrálódik az azonosításhoz és a CI-alapú értékeléshez, valamint hitelesíthető tanúsítványokat állít ki.
 
 ```mermaid
 graph LR
-  Browser["Böngésző (Diák)"] -->|HTTP| Nginx["nginx :80"]
+  Browser["Böngésző (Tanuló)"] -->|HTTP| Nginx["nginx :80"]
   Nginx -->|"/api/*, /verify/*"| FastAPI["FastAPI :8000"]
   Nginx -->|"statikus fájlok"| Astro["Astro build"]
   FastAPI --> PostgreSQL["PostgreSQL :5432"]
@@ -64,7 +64,7 @@ backend/
 
 ```mermaid
 sequenceDiagram
-  participant D as Diák (böngésző)
+  participant D as Tanuló (böngésző)
   participant B as FastAPI backend
   participant G as GitHub OAuth
 
@@ -87,7 +87,7 @@ sequenceDiagram
 | Szerepkör | Jogosultságok |
 |-----------|---------------|
 | `student` | Beiratkozás kurzusokra, haladás megtekintése, tanúsítvány igénylése |
-| `mentor` | Minden, amit a student + diákok haladásának megtekintése |
+| `mentor` | Minden, amit a student + tanulók haladásának megtekintése |
 | `admin` | Minden + kurzusok/modulok/gyakorlatok CRUD, felhasználók kezelése, admin panel |
 
 ### Adatmodell
