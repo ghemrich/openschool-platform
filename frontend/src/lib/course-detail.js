@@ -8,22 +8,29 @@ async function loadCourse() {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
-    const [res, progressRes, coursesRes] = await Promise.all([
-      await fetch(`/api/courses/${slug}`, { headers }),
-      await fetch(`/api/me/courses/${slug}/progress`, { headers }),
-      await fetch(`/api/me/courses`, { headers }),
-    ]);
+    const res = await fetch(`/api/courses/${slug}`, { headers });
     if (!res.ok) {
       container.innerHTML = "<p>Kurzus nem található.</p>";
       return;
     }
     const course = await res.json();
-    const progress = await progressRes.json();
-    const courses = await coursesRes.json();
 
-    const userEnrolled = !!courses.find((course) => {
-      return String(course.course_id) === slug;
-    });
+    let progress = {};
+    let userEnrolled = false;
+
+    if (token) {
+      const [progressRes, coursesRes] = await Promise.all([
+        fetch(`/api/me/courses/${slug}/progress`, { headers }),
+        fetch(`/api/me/courses`, { headers }),
+      ]);
+      if (progressRes.ok) {
+        progress = await progressRes.json();
+      }
+      if (coursesRes.ok) {
+        const courses = await coursesRes.json();
+        userEnrolled = !!courses.find((c) => String(c.course_id) === slug);
+      }
+    }
 
     let modulesHtml = "";
     if (course.modules && course.modules.length > 0) {
