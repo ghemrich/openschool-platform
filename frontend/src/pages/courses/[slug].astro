@@ -1,10 +1,11 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import Layout from "../../layouts/Layout.astro";
 export function getStaticPaths() {
-  return [{ params: { slug: 'placeholder' } }];
+  return [{ params: { slug: "placeholder" } }];
 }
 const { slug } = Astro.params;
 ---
+
 <Layout title="Kurzus">
   <div class="container page">
     <div id="course-detail">
@@ -13,16 +14,35 @@ const { slug } = Astro.params;
   </div>
 
   <script>
-    import '../../lib/course-detail.js';
+    import "../../lib/course-detail.js";
   </script>
 </Layout>
 
 <style>
-  .page { padding: 40px 0; }
-  .course-desc { font-size: 1.1rem; color: var(--color-text-light); margin-bottom: 16px; }
-  .module-card { margin-bottom: 16px; }
-  .module-card h3 { margin-bottom: 8px; }
-  .module-card ul { padding-left: 20px; }
-  .module-card li { margin-bottom: 4px; }
-  .classroom-link { text-decoration: none; margin-left: 6px; font-size: 0.9em; }
+  .page {
+    padding: 40px;
+  }
+
+  .course-desc {
+    font-size: 1.1rem;
+    color: var(--color-text-light);
+    margin-bottom: 16px;
+  }
+  .module-card {
+    margin-bottom: 16px;
+  }
+  .module-card h3 {
+    margin-bottom: 8px;
+  }
+  .module-card ul {
+    padding-left: 20px;
+  }
+  .module-card li {
+    margin-bottom: 4px;
+  }
+  .classroom-link {
+    text-decoration: none;
+    margin-left: 6px;
+    font-size: 0.9em;
+  }
 </style>
