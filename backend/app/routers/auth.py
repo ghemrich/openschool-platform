@@ -29,7 +29,7 @@ def auth_login(request: Request, response: Response):
     import secrets
 
     state = secrets.token_urlsafe(32)
-    scope = "read:user%20user:email%20repo"
+    scope = "read:user%20user:email"
     url = f"{GITHUB_AUTHORIZE_URL}?client_id={settings.github_client_id}&scope={scope}&state={state}"
     resp = RedirectResponse(url=url)
     resp.set_cookie(
@@ -90,7 +90,6 @@ def auth_callback(
         user.username = github_user.get("login", user.username)
         user.avatar_url = github_user.get("avatar_url", user.avatar_url)
         user.email = github_user.get("email", user.email)
-        user.github_token = token_data["access_token"]
     else:
         user = User(
             github_id=github_user["id"],
@@ -98,7 +97,6 @@ def auth_callback(
             email=github_user.get("email"),
             avatar_url=github_user.get("avatar_url"),
             last_login=datetime.now(UTC),
-            github_token=token_data["access_token"],
         )
         db.add(user)
 

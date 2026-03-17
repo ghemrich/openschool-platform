@@ -62,7 +62,7 @@ Ez a funkció a kulcsa a platform automatikus értékelési rendszerének:
 1. A háttérben a szerver lekéri a felhasználó összes beiratkozását
 2. Minden beiratkozott kurzus minden moduljának minden feladatához:
    - Összeállítja a GitHub repo nevét: `{repo_prefix}-{github_username}`
-   - Lekéri a GitHub Actions API-tól a legutóbbi CI futás eredményét (a `GITHUB_ORG_ADMIN_TOKEN`-t használja, ha van org beállítva — a tanuló tokenjének nincs hozzáférése az org privát repóihoz)
+   - Lekéri a GitHub Actions API-tól a legutóbbi CI futás eredményét (a `GITHUB_ORG_ADMIN_TOKEN`-t használja — a tanulók OAuth tokenje nem fér hozzá a repókhoz)
    - Ha a futás `conclusion == "success"` → a feladatot megoldottnak jelöli
 3. A frontend újratölti az oldalt, hogy az új haladás megjelenjen
 

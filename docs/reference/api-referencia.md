@@ -78,7 +78,7 @@ Publikus — hitelesítés nem szükséges.
 |---|---|
 | **Hitelesítés** | Nem szükséges |
 | **Válasz** | `302` redirect a GitHub-ra |
-| **Scope** | `read:user user:email repo` |
+| **Scope** | `read:user user:email` |
 | **Rate limit** | 10 kérés/perc |
 | **Cookie** | `oauth_state` beállítása (CSRF védelem, 10 perc érvényesség) |
 
@@ -96,7 +96,7 @@ GitHub OAuth callback — kódot fogad, tokent cserél, felhasználót hoz létr
 | **Siker** | `302` redirect: `/dashboard` + `access_token` és `refresh_token` httpOnly cookie-k |
 | **Hiba** | `400` — érvénytelen OAuth state, `401` — OAuth hiba vagy érvénytelen GitHub felhasználó |
 
-**Felhasználó létrehozás/frissítés:** A callback létrehoz egy új `User` rekordot (ha nem létezik `github_id` alapján), vagy frissíti a meglévőt (`username`, `avatar_url`, `email`, `github_token`, `last_login`).
+**Felhasználó létrehozás/frissítés:** A callback létrehoz egy új `User` rekordot (ha nem létezik `github_id` alapján), vagy frissíti a meglévőt (`username`, `avatar_url`, `email`, `last_login`). A felhasználó GitHub OAuth tokenjét a rendszer **nem tárolja** — a GitHub Classroom integrációhoz a szerver-oldali `GITHUB_ORG_ADMIN_TOKEN` kerül felhasználásra.
 
 **Automatikus org meghívás:** Ha a `GITHUB_ORG` és `GITHUB_ORG_ADMIN_TOKEN` konfigurálva van, a callback automatikusan meghívja a felhasználót a GitHub szervezetbe (member szerepkörrel). Ha a meghívás sikertelen, a bejelentkezés továbbra is megtörténik.
 
@@ -503,9 +503,9 @@ Haladás szinkronizálása a GitHub CI állapotából. Végigmegy az összes bei
 |---|---|
 | **Hitelesítés** | Bearer token vagy `access_token` cookie (bármely szerepkör) |
 | **Siker** | `200` — frissített kurzuslista (mint `GET /api/me/courses`) |
-| **Hiba** | `400` — nincs GitHub token (újbóli bejelentkezés szükséges) |
+| **Hiba** | `400` — `GITHUB_ORG` és `GITHUB_ORG_ADMIN_TOKEN` nincs konfigurálva |
 
-**Működés:** A backend a `GITHUB_ORG` (vagy a felhasználó GitHub neve) szervezet alatt keresi a `{repo_prefix}-{username}` nevű repókat, és lekéri a legutóbbi sikeres CI futást a GitHub API-ból. Ha a `GITHUB_ORG` és `GITHUB_ORG_ADMIN_TOKEN` konfigurálva van, a szerver az admin tokent használja a lekérdezéshez (a tanuló OAuth tokenjének nincs jogosultsága az org privát repók Actions API-jához). Ha nincs org beállítva, a tanuló saját tokenje kerül felhasználásra.
+**Működés:** A backend a `GITHUB_ORG` szervezet alatt keresi a `{repo_prefix}-{username}` nevű repókat, és lekéri a legutóbbi sikeres CI futást a GitHub API-ból. A szerver a `GITHUB_ORG_ADMIN_TOKEN` tokent használja a lekérdezéshez — a tanulók OAuth tokenje nem szükséges (az OAuth login csak `read:user` és `user:email` scope-ot kér). Ha a `GITHUB_ORG` vagy `GITHUB_ORG_ADMIN_TOKEN` nincs beállítva, a végpont `400` hibát ad.
 
 ---
 

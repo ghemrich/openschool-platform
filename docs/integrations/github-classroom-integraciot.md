@@ -24,8 +24,8 @@ Ez a dokumentum lépésről lépésre leírja, hogyan kell egy GitHub Classroom-
 1. **GitHub Organization** — kell egy GitHub szervezet (org), amelyben a GitHub Classroom működik (pl. `OpenSchool-HU`)
 2. **GitHub Classroom** — a szervezethez kapcsolt Classroom (<https://classroom.github.com>)
 3. **OpenSchool admin hozzáférés** — admin szerepkörű felhasználó a platformon
-4. **`.env` konfigurálva** — a `GITHUB_ORG` kitöltve (lásd lent)
-5. **Automatikus org meghívás (opcionális)** — ha a `GITHUB_ORG_ADMIN_TOKEN` is be van állítva, a tanulók az első bejelentkezéskor automatikusan meghívást kapnak a GitHub szervezetbe (nem kell manuálisan meghívni őket)
+4. **`.env` konfigurálva** — a `GITHUB_ORG` és `GITHUB_ORG_ADMIN_TOKEN` kitöltve (lásd lent)
+5. **Automatikus org meghívás** — a `GITHUB_ORG_ADMIN_TOKEN` beállításával a tanulók az első bejelentkezéskor automatikusan meghívást kapnak a GitHub szervezetbe (nem kell manuálisan meghívni őket)
 
 ---
 
@@ -36,12 +36,12 @@ A `.env` fájlban a következő értékeket kell kitölteni:
 ```env
 GITHUB_ORG=OpenSchool-HU             # A GitHub org neve, ahol a Classroom repókat hozza létre
 GITHUB_WEBHOOK_SECRET=valami-titkos-kulcs  # Webhook HMAC ellenőrzéshez (opcionális, de ajánlott)
-GITHUB_ORG_ADMIN_TOKEN=ghp_xxx...    # Org owner PAT (admin:org scope) — automatikus meghívás (opcionális)
+GITHUB_ORG_ADMIN_TOKEN=ghp_xxx...    # Org owner PAT (admin:org + repo scope) — KÖTELEZŐ a Classroom integrációhoz
 ```
 
 A `GITHUB_ORG` kritikus: ez mondja meg a rendszernek, hogy melyik szervezet alatt keresse a tanulók repóit. Ha üresen marad, a rendszer a bejelentkezett felhasználó saját GitHub-ját használja tulajdonosként, ami nem fog működni Classroom repókkal.
 
-A `GITHUB_ORG_ADMIN_TOKEN` opcionális, de ajánlott: ha be van állítva, a rendszer automatikusan meghívja a felhasználót a GitHub szervezetbe az első bejelentkezéskor. A token létrehozása: [github.com/settings/tokens](https://github.com/settings/tokens) → „Generate new token (classic)" → `admin:org` scope.
+A `GITHUB_ORG_ADMIN_TOKEN` **kötelező** a GitHub Classroom integrációhoz. A rendszer ezt a tokent használja a tanulók repóinak CI státuszának lekérdezéséhez (haladás szinkronizálás) és az org meghíváshoz. Így a tanulóknak **nem kell** repo hozzáférést adniuk bejelentkezéskor — az OAuth login csak a profil adatokat kéri (`read:user`, `user:email`). A token létrehozása: [github.com/settings/tokens](https://github.com/settings/tokens) → „Generate new token (classic)" → `admin:org` + `repo` scope.
 
 ---
 
@@ -173,6 +173,6 @@ A jelenlegi rendszerben az alábbiak **nem** automatikusak:
 |---|---|
 | Szinkronizálás nem talál repót | `GITHUB_ORG` nincs beállítva a `.env`-ben, vagy a `repo_prefix` nem egyezik a Classroom prefix-szel |
 | Webhook nem frissít | `GITHUB_WEBHOOK_SECRET` nem egyezik, vagy a webhook nem a `workflow_runs` eseményre van beállítva |
-| „Nincs GitHub token" hiba | A tanuló token-je lejárt — újra be kell jelentkeznie |
+| „GitHub Classroom sync is not configured" hiba | `GITHUB_ORG` és/vagy `GITHUB_ORG_ADMIN_TOKEN` nincs beállítva a `.env`-ben |
 | Haladás 0% marad | A CI workflow nem fut sikeresen a tanuló repójában, vagy nincs `.github/workflows/` a template repóban |
 | Felhasználó nem kapott org meghívót | `GITHUB_ORG_ADMIN_TOKEN` nincs beállítva, vagy a token nem rendelkezik `admin:org` scope-pal, vagy a token tulajdonosa nem org owner |

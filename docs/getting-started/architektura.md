@@ -108,7 +108,7 @@ erDiagram
 
 | Tábla | Kulcs mezők |
 |-------|-------------|
-| `users` | github_id, username, email, avatar_url, role (student/mentor/admin), github_token |
+| `users` | github_id, username, email, avatar_url, role (student/mentor/admin) |
 | `courses` | name, description |
 | `modules` | course_id, name, order |
 | `exercises` | module_id, name, repo_prefix, order, required, classroom_url |

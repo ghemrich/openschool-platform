@@ -54,8 +54,8 @@ Ezeket a `.env` fájlban kell beállítani a projekt gyökerében. A backend a `
 |---------|----------|---------|--------|
 | `GITHUB_CLIENT_ID` | Bejelentkezéshez | `""` | GitHub OAuth App Client ID. Létrehozás: [github.com/settings/developers](https://github.com/settings/developers) |
 | `GITHUB_CLIENT_SECRET` | Bejelentkezéshez | `""` | GitHub OAuth App Client Secret. **Élesben kötelező** |
-| `GITHUB_ORG` | Nem | `""` | GitHub szervezet neve a repók kereséséhez. Ha üres, a felhasználó saját fiókja alatt keres |
-| `GITHUB_ORG_ADMIN_TOKEN` | Nem | `""` | Personal Access Token (classic) org tulajdonostól, `admin:org` scope-pal. Ha be van állítva (és `GITHUB_ORG` is kitöltve), az első bejelentkezéskor automatikusan meghívja a felhasználót a GitHub szervezetbe. Létrehozás: [github.com/settings/tokens](https://github.com/settings/tokens) → „Generate new token (classic)" → `admin:org` |
+| `GITHUB_ORG` | Classroom-hoz igen | `""` | GitHub szervezet neve a repók kereséséhez. **Kötelező a GitHub Classroom integrációhoz** |
+| `GITHUB_ORG_ADMIN_TOKEN` | Classroom-hoz igen | `""` | Personal Access Token (classic) org tulajdonostól, `admin:org` + `repo` scope-pal. **Kötelező a GitHub Classroom integrációhoz** — a szerver ezzel kérdezi le a tanulók repóinak CI státuszát és hívja meg őket az org-ba. Létrehozás: [github.com/settings/tokens](https://github.com/settings/tokens) → „Generate new token (classic)" → `admin:org` + `repo` |
 | `GITHUB_WEBHOOK_SECRET` | **Staging/élesben kötelező** | `""` | Webhook HMAC-SHA256 aláíró kulcs. Staging és production környezetben kötelező — a webhook végpont elutasítja az aláírás nélküli kéréseket. Generálás: `openssl rand -hex 20` |
 
 ---
@@ -182,4 +182,4 @@ A `backend/app/config.py` fájlban a `Settings` osztály Pydantic `model_validat
 | `ENVIRONMENT=production` + `GITHUB_WEBHOOK_SECRET` üres | **ValueError** — a backend nem indul el |
 | `ENVIRONMENT=staging` + `SECRET_KEY=change-me-in-production` | **ValueError** — a backend nem indul el |
 | `ENVIRONMENT=staging` + `GITHUB_WEBHOOK_SECRET` üres | **ValueError** — a backend nem indul el |
-| `GITHUB_ORG_ADMIN_TOKEN` üres (bármely környezet) | Org meghívás kimarad — a bejelentkezés normálisan működik, de a felhasználó nem kap automatikus meghívást a GitHub szervezetbe |
+| `GITHUB_ORG_ADMIN_TOKEN` üres (bármely környezet) | Org meghívás és haladás szinkronizálás kimarad — a bejelentkezés normálisan működik, de a `POST /api/me/sync-progress` végpont `400` hibát ad |

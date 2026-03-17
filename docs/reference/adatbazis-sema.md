@@ -30,7 +30,6 @@ erDiagram
         enum role
         datetime created_at
         datetime last_login
-        string github_token
     }
 
     courses {
@@ -101,7 +100,6 @@ A GitHub OAuth-tal regisztrált felhasználók. Minden felhasználónak egyedi `
 | `role` | Enum | Nem | `student` | Szerepkör: `student`, `mentor`, `admin`. Admin módosíthatja |
 | `created_at` | DateTime | Igen | `now()` | Regisztráció időpontja (első bejelentkezés) |
 | `last_login` | DateTime | Igen | — | Utolsó bejelentkezés időpontja. Minden login-kor frissül |
-| `github_token` | String | Igen | — | GitHub access token. Minden login-kor frissül. A `sync-progress` végpont az org admin tokent (`GITHUB_ORG_ADMIN_TOKEN`) részesíti előnyben; ez a token fallback, ha nincs org beállítva |
 
 **Egyedi megszorítások:** `github_id` (unique), `username` (unique)
 
@@ -194,7 +192,7 @@ Feladatok haladási állapota — egy felhasználó egy feladathoz egy rekordot 
 **Ki frissítheti:**
 1. **Felhasználó manuálisan**: `POST /api/me/courses/{id}/progress`
 2. **GitHub webhook**: automatikusan, ha a CI fut sikeres
-3. **Sync-progress**: `POST /api/me/sync-progress` — lekérdezi a GitHub API-t
+3. **Sync-progress**: `POST /api/me/sync-progress` — a `GITHUB_ORG_ADMIN_TOKEN` segítségével lekérdezi a GitHub API-t
 
 ---
 
@@ -269,7 +267,7 @@ alembic downgrade -1
 |------|--------|
 | `5492c9d27e5f` | `users` tábla létrehozása |
 | `38fa8a895630` | `courses`, `modules`, `exercises`, `enrollments`, `progress` táblák |
-| `a1b2c3d4e5f6` | `github_token` oszlop hozzáadása (`users`) + `classroom_url` (`exercises`) |
+| `a1b2c3d4e5f6` | `github_token` oszlop hozzáadása (`users`, **deprecated — már nem használt**) + `classroom_url` (`exercises`) |
 | `cefa39428d67` | `certificates` tábla + `required` oszlop (`exercises`) |
 
 ### Migráció létrehozási folyamat

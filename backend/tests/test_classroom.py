@@ -12,7 +12,6 @@ def student(db_session):
         username="student1",
         email="s@example.com",
         role=UserRole.student,
-        github_token="ghp_fake_token",
     )
     db_session.add(user)
     db_session.commit()
