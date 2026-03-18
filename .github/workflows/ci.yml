@@ -75,10 +75,11 @@ jobs:
       - name: Discord notification
         env:
           DISCORD_WEBHOOK_CI: ${{ secrets.DISCORD_WEBHOOK_CI }}
+          CI_TITLE: "CI: ${{ github.event.head_commit.message || github.event.pull_request.title || 'PR check' }}"
         run: |
           ./scripts/discord-notify.sh \
             --status "${{ job.status }}" \
-            --title "CI: ${{ github.event.head_commit.message || github.event.pull_request.title || 'PR check' }}" \
+            --title "$CI_TITLE" \
             --repo "${{ github.repository }}" \
             --commit "${{ github.sha }}" \
             --author "${{ github.actor }}" \
