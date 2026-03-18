@@ -2,6 +2,9 @@
 
 ### 🚀 Features
 
+- Add Discord role sync (bot API, discord_id linking, auto role assignment on promotion/admin change)
+- Add automatic promotion system (promotion rules, admin CRUD, Discord notifications)
+- Add role badge to navbar and dashboard (student/mentor/admin)
 - Migrate frontend from Astro to React 19 + TypeScript + Vite
 - Add frontend test suite (Vitest + React Testing Library, 39 tests)
 - Add frontend CI jobs (lint + test) to GitHub Actions workflows

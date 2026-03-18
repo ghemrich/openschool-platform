@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import type { DashboardCourse, Certificate, ModuleProgress, Course } from '../lib/types';
+import type { DashboardCourse, Certificate, ModuleProgress, Course, User } from '../lib/types';
 import { apiFetch } from '../lib/api';
 
 function statusPrefix(status: string): string {
@@ -45,12 +45,17 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [syncMsg, setSyncMsg] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [discordId, setDiscordId] = useState('');
+  const [discordMsg, setDiscordMsg] = useState('');
+  const [discordSaving, setDiscordSaving] = useState(false);
 
   const loadDashboard = useCallback(async () => {
     try {
-      const [dashRes, certRes] = await Promise.all([
+      const [dashRes, certRes, meRes] = await Promise.all([
         fetch('/api/me/dashboard', { credentials: 'same-origin' }),
         fetch('/api/me/certificates', { credentials: 'same-origin' }),
+        fetch('/api/auth/me', { credentials: 'same-origin' }),
       ]);
 
       if (dashRes.status === 401 || dashRes.status === 403) {
@@ -60,6 +65,11 @@ export default function DashboardPage() {
 
       const dashData: DashboardCourse[] = await dashRes.json();
       const certData: Certificate[] = certRes.ok ? await certRes.json() : [];
+      if (meRes.ok) {
+        const userData = await meRes.json();
+        setUser(userData);
+        setDiscordId(userData.discord_id || '');
+      }
       setCourses(dashData);
       setCerts(certData);
 
@@ -157,7 +167,18 @@ export default function DashboardPage() {
 
   return (
     <div className="container page">
-      <h1>Dashboard</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+        <h1 style={{ margin: 0 }}>Dashboard</h1>
+        {user && (
+          <span className={`role-badge role-badge--${user.role}`}>
+            {user.role === 'admin'
+              ? '🛡️ Admin'
+              : user.role === 'mentor'
+                ? '🎓 Mentor'
+                : '📚 Tanuló'}
+          </span>
+        )}
+      </div>
       <button
         className="btn btn-secondary"
         style={{ marginBottom: 20 }}
@@ -169,6 +190,57 @@ export default function DashboardPage() {
       {syncMsg && (
         <p style={{ color: syncMsg.includes('frissítve') ? 'green' : 'red' }}>{syncMsg}</p>
       )}
+
+      <div className="card" style={{ marginBottom: 20, padding: 16 }}>
+        <h3 style={{ marginTop: 0 }}>🔗 Discord összekapcsolás</h3>
+        <p style={{ fontSize: '0.9rem', color: '#666', margin: '4px 0 12px' }}>
+          Add meg a Discord felhasználói ID-dat a szerepkör szinkronizáláshoz. Discord Beállítások →
+          Alkalmazás beállításai → Haladó → kapcsold be a Fejlesztői módot. Ezután menj vissza
+          bármely szerverre, jobb klikk a nevedre a taglistában → ID másolása.
+        </p>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Discord User ID (pl. 123456789012345678)"
+            value={discordId}
+            onChange={(e) => setDiscordId(e.target.value)}
+            style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #ccc', width: 300 }}
+          />
+          <button
+            className="btn btn-primary"
+            disabled={discordSaving}
+            onClick={async () => {
+              setDiscordSaving(true);
+              setDiscordMsg('');
+              try {
+                const r = await fetch('/api/auth/me', {
+                  method: 'PATCH',
+                  credentials: 'same-origin',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ discord_id: discordId || '' }),
+                });
+                if (r.ok) {
+                  setDiscordMsg(discordId ? 'Discord összekapcsolva!' : 'Discord leválasztva.');
+                } else {
+                  const d = await r.json();
+                  setDiscordMsg(d.detail || 'Hiba történt.');
+                }
+              } catch {
+                setDiscordMsg('Hiba történt.');
+              } finally {
+                setDiscordSaving(false);
+              }
+            }}
+          >
+            {discordSaving ? '⏳' : discordId ? 'Mentés' : 'Leválasztás'}
+          </button>
+        </div>
+        {discordMsg && (
+          <p style={{ color: discordMsg.includes('!') ? 'green' : 'red', marginTop: 8 }}>
+            {discordMsg}
+          </p>
+        )}
+      </div>
 
       {courses.length === 0 ? (
         <div>

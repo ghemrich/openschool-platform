@@ -220,10 +220,10 @@ A platform növekedési motorja: tanúsítvány-alapú automatikus előlépteté
 
 **Előléptetési rendszer:**
 
-- [ ] Promotion szabályok adatmodell: tanúsítvány-kombinációk → célszerepkör (pl. "Python Haladó" + "Mentor Képzés" → `mentor`)
-- [ ] Automatikus szerepkör-váltás tanúsítvány kiállításakor (szabály-motor a certificate service-ben)
-- [ ] Discord értesítés előléptetéskor (pl. "🎓 @username mentorrá vált!")
-- [ ] Discord szerepkör szinkronizáció (platform szerepkör → Discord role)
+- [x] Promotion szabályok adatmodell: tanúsítvány-kombinációk → célszerepkör (pl. "Python Haladó" + "Mentor Képzés" → `mentor`) — `models/promotion.py` (`PromotionRule`, `PromotionRuleRequirement`, `PromotionLog`)
+- [x] Automatikus szerepkör-váltás tanúsítvány kiállításakor (szabály-motor a certificate service-ben) — `services/promotion.py` (`check_and_promote()`)
+- [x] Discord értesítés előléptetéskor (pl. "🎓 @username mentorrá vált!") — `services/discord.py` (`notify_promotion()`)
+- [x] Discord szerepkör szinkronizáció (platform szerepkör → Discord role)
 
 **Mentor onboarding kurzus:**
 
@@ -285,9 +285,9 @@ A platform fejlesztése során a következő külső eszközök integrálása te
 | GitHub Classroom | Feladatkiadás és autograding | ✅ Webhook + repo_prefix + sync |
 | Discord értesítések (CI/CD + ops) | CI/CD és VPS monitoring értesítések | ✅ Működik |
 | Discord értesítések (platform) | Platform → Discord (beiratkozás, tanúsítvány) | ✅ Működik |
-| Automatikus előléptetés | Tanúsítvány-alapú szerepkör váltás | 🔴 Tervezett |
+| Automatikus előléptetés | Tanúsítvány-alapú szerepkör váltás | ✅ Működik |
 | GitHub org team meghívás | Fejlesztők automatikus meghívása | 🔴 Tervezett |
-| Discord szerepkör szinkronizáció | Platform → Discord role szinkron | 🔴 Tervezett |
+| Discord szerepkör szinkronizáció | Platform → Discord role szinkron | � Kész |
 
 ---
 
@@ -296,7 +296,7 @@ A platform fejlesztése során a következő külső eszközök integrálása te
 1. ~~**VPS telepítés**~~ ✅ — éles rendszer felállítva
 2. ~~**Discord szerver**~~ ✅ — szerver létrehozva ([discord.gg/BrKd45S6](https://discord.gg/BrKd45S6)), CI/CD + ops monitoring értesítések működnek
 3. ~~**Discord platform értesítések**~~ ✅ — beiratkozás és tanúsítvány értesítések működnek (`services/discord.py`)
-4. **Automatikus mentor pipeline** — előléptetési szabályok, mentor kurzus, mentor dashboard ← **KÖVETKEZŐ LÉPÉS**
+4. **Automatikus mentor pipeline** — ✅ előléptetési szabályok kész; mentor kurzus, mentor dashboard ← **KÖVETKEZŐ LÉPÉS**
 5. **Mentori eszközök** — haladás összesítés, Classroom szinkronizálás
 6. **Platform fejlesztő track** — meta-kurzus valódi platform hozzájárulásokkal
 7. **Haladó funkciók** — PR-ek, Issues, csapatmunka
@@ -306,7 +306,7 @@ A platform fejlesztése során a következő külső eszközök integrálása te
 
 ## Összefoglalás
 
-A platform alapjai **készen állnak**: backend API (auth, kurzusok, haladás, tanúsítványok, admin, Discord értesítések), frontend (9 oldal), infrastruktúra (Docker, CI/CD, nginx, automatizált karbantartás, Discord értesítések), GitHub Classroom integráció (repo_prefix, webhook, sync), admin panel, és átfogó dokumentáció. A **VPS éles rendszer felállítva**, a **Discord szerver működik** ([discord.gg/BrKd45S6](https://discord.gg/BrKd45S6)), a **platform → Discord értesítések** (beiratkozás, tanúsítvány) implementálva.
+A platform alapjai **készen állnak**: backend API (auth, kurzusok, haladás, tanúsítványok, admin, Discord értesítések, automatikus előléptetés), frontend (9 oldal, szerepkör badge-ek), infrastruktúra (Docker, CI/CD, nginx, automatizált karbantartás, Discord értesítések), GitHub Classroom integráció (repo_prefix, webhook, sync), admin panel, és átfogó dokumentáció. A **VPS éles rendszer felállítva**, a **Discord szerver működik** ([discord.gg/BrKd45S6](https://discord.gg/BrKd45S6)), a **platform → Discord értesítések** (beiratkozás, tanúsítvány, előléptetés) implementálva. Az **automatikus előléptetési rendszer** (promotion rules, admin CRUD, Discord értesítés) működik.
 
 A hosszú távú vízió egy **önfenntartó közösség** kiépítése: a tanulók tanúsítványok megszerzésével automatikusan mentorrá válhatnak, majd a platform fejlesztésébe is bekapcsolódhatnak. Ez a modell lehetővé teszi, hogy a platform organikusan növekedjen — minden új mentor egyben új mentor és potenciális fejlesztő is.
 

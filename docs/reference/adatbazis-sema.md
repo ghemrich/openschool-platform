@@ -15,11 +15,15 @@ erDiagram
     users ||--o{ enrollments : "beiratkozik"
     users ||--o{ progress : "haladás"
     users ||--o{ certificates : "tanúsítvány"
+    users ||--o{ promotion_log : "előléptetés"
     courses ||--o{ modules : "tartalmaz"
     courses ||--o{ enrollments : "beiratkozás"
     courses ||--o{ certificates : "tanúsítvány"
+    courses ||--o{ promotion_rule_requirements : "feltétel"
     modules ||--o{ exercises : "tartalmaz"
     exercises ||--o{ progress : "haladás"
+    promotion_rules ||--o{ promotion_rule_requirements : "követelmény"
+    promotion_rules ||--o{ promotion_log : "napló"
 
     users {
         int id PK
@@ -28,6 +32,7 @@ erDiagram
         string email
         string avatar_url
         enum role
+        string discord_id UK
         datetime created_at
         datetime last_login
     }
@@ -80,6 +85,30 @@ erDiagram
         datetime issued_at
         string pdf_path
     }
+
+    promotion_rules {
+        int id PK
+        string name
+        string description
+        enum target_role
+        bool is_active
+        datetime created_at
+    }
+
+    promotion_rule_requirements {
+        int id PK
+        int rule_id FK
+        int course_id FK
+    }
+
+    promotion_log {
+        int id PK
+        int user_id FK
+        int rule_id FK
+        enum previous_role
+        enum new_role
+        datetime promoted_at
+    }
 ```
 
 ---
@@ -98,10 +127,11 @@ A GitHub OAuth-tal regisztrált felhasználók. Minden felhasználónak egyedi `
 | `email` | String | Igen | — | Email cím a GitHub profilból (lehet `null`, ha privát) |
 | `avatar_url` | String | Igen | — | GitHub profilkép URL-je. Bejelentkezéskor frissül |
 | `role` | Enum | Nem | `student` | Szerepkör: `student`, `mentor`, `admin`. Admin módosíthatja |
+| `discord_id` | String | Igen | — | Discord felhasználó azonosító (snowflake, 17-20 számjegy). Egyedi. A felhasználó a dashboardon állítja be |
 | `created_at` | DateTime | Igen | `now()` | Regisztráció időpontja (első bejelentkezés) |
 | `last_login` | DateTime | Igen | — | Utolsó bejelentkezés időpontja. Minden login-kor frissül |
 
-**Egyedi megszorítások:** `github_id` (unique), `username` (unique)
+**Egyedi megszorítások:** `github_id` (unique), `username` (unique), `discord_id` (unique)
 
 ---
 
@@ -213,6 +243,52 @@ Kiállított tanúsítványok. Minden tanúsítványhoz UUID generálódik és o
 
 ---
 
+### `promotion_rules`
+
+Előléptetési szabályok. Egy szabály meghatározza, hogy mely tanúsítvány-kombináció szükséges egy adott szerepkör eléréséhez.
+
+| Oszlop | Típus | Nullable | Default | Leírás |
+|--------|-------|----------|---------|--------|
+| `id` | Integer | — | autoincrement | Elsődleges kulcs |
+| `name` | String | Nem | — | Szabály neve (pl. "Python Mentor") |
+| `description` | String | Igen | — | Szabály leírása |
+| `target_role` | Enum | Nem | — | Célszerepkör: `mentor` vagy `admin` |
+| `is_active` | Boolean | Nem | `true` | Aktív-e a szabály |
+| `created_at` | DateTime | Igen | `now()` | Létrehozás időpontja |
+
+**Kapcsolatok:** `requirements` (PromotionRuleRequirement lista, cascade delete)
+
+---
+
+### `promotion_rule_requirements`
+
+Egy előléptetési szabályhoz tartozó kurzus-követelmények. A szabály akkor teljesül, ha a felhasználó minden felsorolt kurzushoz rendelkezik tanúsítvánnyal.
+
+| Oszlop | Típus | Nullable | Default | Leírás |
+|--------|-------|----------|---------|--------|
+| `id` | Integer | — | autoincrement | Elsődleges kulcs |
+| `rule_id` | Integer (FK) | Nem | — | Szülő szabály (`promotion_rules.id`, CASCADE) |
+| `course_id` | Integer (FK) | Nem | — | Szükséges kurzus (`courses.id`) |
+
+**Egyedi megszorítások:** `(rule_id, course_id)` — egy kurzus csak egyszer szerepelhet egy szabályban
+
+---
+
+### `promotion_log`
+
+Előléptetési napló — minden automatikus szerepkör-változás rögzítve.
+
+| Oszlop | Típus | Nullable | Default | Leírás |
+|--------|-------|----------|---------|--------|
+| `id` | Integer | — | autoincrement | Elsődleges kulcs |
+| `user_id` | Integer (FK) | Nem | — | Előléptetett felhasználó (`users.id`) |
+| `rule_id` | Integer (FK) | Nem | — | Alkalmazott szabály (`promotion_rules.id`) |
+| `previous_role` | Enum | Nem | — | Korábbi szerepkör |
+| `new_role` | Enum | Nem | — | Új szerepkör |
+| `promoted_at` | DateTime | Igen | `now()` | Előléptetés időpontja |
+
+---
+
 ## Kapcsolatok összefoglaló
 
 | Forrás | Cél | Típus | FK | Leírás |
@@ -225,6 +301,10 @@ Kiállított tanúsítványok. Minden tanúsítványhoz UUID generálódik és o
 | `progress` | `exercises` | N:1 | `exercise_id` | Haladás → feladat |
 | `certificates` | `users` | N:1 | `user_id` | Tanúsítvány → felhasználó |
 | `certificates` | `courses` | N:1 | `course_id` | Tanúsítvány → kurzus |
+| `promotion_rule_requirements` | `promotion_rules` | N:1 | `rule_id` | Követelmény → szabály (CASCADE) |
+| `promotion_rule_requirements` | `courses` | N:1 | `course_id` | Követelmény → kurzus |
+| `promotion_log` | `users` | N:1 | `user_id` | Előléptetés → felhasználó |
+| `promotion_log` | `promotion_rules` | N:1 | `rule_id` | Előléptetés → szabály |
 
 ---
 
@@ -269,6 +349,8 @@ alembic downgrade -1
 | `38fa8a895630` | `courses`, `modules`, `exercises`, `enrollments`, `progress` táblák |
 | `a1b2c3d4e5f6` | `github_token` oszlop hozzáadása (`users`, **deprecated — már nem használt**) + `classroom_url` (`exercises`) |
 | `cefa39428d67` | `certificates` tábla + `required` oszlop (`exercises`) |
+| `d1e2f3a4b5c6` | `promotion_rules`, `promotion_rule_requirements`, `promotion_log` táblák |
+| `e2f3a4b5c6d7` | `discord_id` oszlop hozzáadása (`users`, unique) |
 
 ### Migráció létrehozási folyamat
 

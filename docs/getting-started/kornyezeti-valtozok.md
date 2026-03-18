@@ -64,6 +64,9 @@ Ezeket a `.env` fájlban kell beállítani a projekt gyökerében. A backend a `
 | Változó | Kötelező | Default | Leírás |
 |---------|----------|---------|--------|
 | `DISCORD_WEBHOOK_URL` | Nem | `""` | Discord webhook URL a platform értesítésekhez (beiratkozás, tanúsítvány kiállítás). Ha üres, az értesítések átugródnak |
+| `DISCORD_BOT_TOKEN` | Nem | `""` | Discord bot token a szerepkör szinkronizációhoz. Beszerzés: [Developer Portal](https://discord.com/developers/applications) → Bot → Reset Token |
+| `DISCORD_GUILD_ID` | Nem | `""` | Discord szerver (guild) azonosító. Fejlesztői mód → jobb klikk szerverre → ID másolása |
+| `DISCORD_ROLE_MAP` | Nem | `""` | Platform → Discord szerepkör leképezés. Formátum: `"student:ROLE_ID,mentor:ROLE_ID,admin:ROLE_ID"` |
 
 ---
 
@@ -87,6 +90,9 @@ A `docker-compose.yml` és `docker-compose.prod.yml` a `.env` fájlból olvassa 
 | `GITHUB_ORG_ADMIN_TOKEN` | Backend container | Org meghívó token |
 | `GITHUB_WEBHOOK_SECRET` | Backend container | Webhook secret |
 | `DISCORD_WEBHOOK_URL` | Backend container | Discord platform értesítések (beiratkozás, tanúsítvány) |
+| `DISCORD_BOT_TOKEN` | Backend container | Discord bot token (szerepkör szinkronizáció) |
+| `DISCORD_GUILD_ID` | Backend container | Discord szerver azonosító |
+| `DISCORD_ROLE_MAP` | Backend container | Platform → Discord szerepkör leképezés |
 | `PROD_DOMAIN` | Nginx container | Éles domain név (envsubst template-hez) |
 | `STAGING_DOMAIN` | Nginx container | Staging domain név (envsubst template-hez) |
 

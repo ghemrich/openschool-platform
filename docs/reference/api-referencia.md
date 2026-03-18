@@ -119,8 +119,42 @@ Az aktuálisan bejelentkezett felhasználó adatai.
   "username": "diak1",
   "email": "diak1@example.com",
   "avatar_url": "https://avatars.githubusercontent.com/u/12345678",
-  "role": "student"
+  "role": "student",
+  "discord_id": "123456789012345678"
 }
+```
+
+---
+
+### `PATCH /api/auth/me`
+
+Profil frissítés — jelenleg a Discord ID beállítására/törlésére szolgál.
+
+| | |
+|---|---|
+| **Hitelesítés** | Bearer token vagy `access_token` cookie (bármely szerepkör) |
+| **Válasz** | `200` — sikeres módosítás |
+| **Hiba** | `400` — érvénytelen Discord ID formátum, vagy a felhasználó nem tagja a szervernek |
+| | `409` — a Discord ID már másik fiókhoz van rendelve |
+
+**Kérés:**
+
+```json
+{"discord_id": "123456789012345678"}
+```
+
+**Törlés:** `{"discord_id": ""}` — eltávolítja a Discord összekapcsolást.
+
+**Validáció:**
+- A Discord ID numerikus snowflake (17-20 számjegy)
+- A Discord ID egyedi — nem lehet másik fiókhoz rendelve
+- A felhasználónak a szerveren kell lennie (a bot ellenőrzi a tagságot)
+- Sikeres mentés után a platform automatikusan szinkronizálja a szerepkört Discord-ra
+
+**Válasz:**
+
+```json
+{"discord_id": "123456789012345678"}
 ```
 
 ---
@@ -704,6 +738,143 @@ Feladat törlése (haladás rekordok törlődnek).
 
 ---
 
+### `GET /api/admin/promotion-rules`
+
+Előléptetési szabályok listázása.
+
+| | |
+|---|---|
+| **Hitelesítés** | Bearer token, `admin` szerepkör |
+| **Válasz** | `200` |
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Python Mentor",
+    "description": "Python alapok + Backend elvégzése",
+    "target_role": "mentor",
+    "is_active": true,
+    "created_at": "2026-03-20T10:00:00",
+    "course_ids": [1, 3]
+  }
+]
+```
+
+---
+
+### `POST /api/admin/promotion-rules`
+
+Új előléptetési szabály létrehozása.
+
+| | |
+|---|---|
+| **Hitelesítés** | Bearer token, `admin` szerepkör |
+| **Siker** | `201` |
+| **Hiba** | `400` — érvénytelen role vagy nem létező course_id |
+
+**Kérés:**
+```json
+{
+  "name": "Python Mentor",
+  "description": "Python alapok + Backend kurzus elvégzése",
+  "target_role": "mentor",
+  "course_ids": [1, 3]
+}
+```
+
+| Mező | Típus | Kötelező | Validáció |
+|------|-------|----------|-----------|
+| `name` | string | igen | 1–200 karakter |
+| `description` | string | nem | max 2000 karakter |
+| `target_role` | string | igen | `"mentor"` vagy `"admin"` |
+| `course_ids` | int[] | igen | legalább 1 létező kurzus |
+
+---
+
+### `GET /api/admin/promotion-rules/{rule_id}`
+
+Egy előléptetési szabály részletei.
+
+| | |
+|---|---|
+| **Hitelesítés** | Bearer token, `admin` szerepkör |
+| **Siker** | `200` |
+| **Hiba** | `404` — nem található |
+
+---
+
+### `PATCH /api/admin/promotion-rules/{rule_id}`
+
+Előléptetési szabály módosítása.
+
+| | |
+|---|---|
+| **Hitelesítés** | Bearer token, `admin` szerepkör |
+| **Siker** | `200` |
+| **Hiba** | `400` — érvénytelen role/course, `404` — nem található |
+
+**Kérés (részleges frissítés):**
+```json
+{
+  "name": "Python Mentor v2",
+  "is_active": false
+}
+```
+
+| Mező | Típus | Kötelező |
+|------|-------|----------|
+| `name` | string | nem |
+| `description` | string | nem |
+| `target_role` | string | nem |
+| `is_active` | bool | nem |
+| `course_ids` | int[] | nem |
+
+---
+
+### `DELETE /api/admin/promotion-rules/{rule_id}`
+
+Előléptetési szabály törlése.
+
+| | |
+|---|---|
+| **Hitelesítés** | Bearer token, `admin` szerepkör |
+| **Siker** | `200` |
+| **Hiba** | `404` — nem található |
+
+```json
+{"detail": "Promotion rule deleted"}
+```
+
+---
+
+### `GET /api/admin/promotion-log`
+
+Előléptetési napló (automatikus előléptetések listája).
+
+| | |
+|---|---|
+| **Hitelesítés** | Bearer token, `admin` szerepkör |
+| **Query paraméterek** | `skip` (int, default: 0), `limit` (int, default: 50) |
+
+**Válasz (200):**
+```json
+[
+  {
+    "id": 1,
+    "user_id": 3,
+    "username": "diak1",
+    "rule_id": 1,
+    "rule_name": "Python Mentor",
+    "previous_role": "student",
+    "new_role": "mentor",
+    "promoted_at": "2026-03-20T12:00:00"
+  }
+]
+```
+
+---
+
 ## 7. Webhooks
 
 ### `POST /api/webhooks/github`
@@ -752,6 +923,7 @@ GitHub webhook fogadása — `workflow_run` események alapján automatikusan fr
 | `/api/auth/login` | GET | — | GitHub OAuth redirect |
 | `/api/auth/callback` | GET | — | OAuth callback |
 | `/api/auth/me` | GET | Bearer | Profil |
+| `/api/auth/me` | PATCH | Bearer | Profil frissítés (Discord ID) |
 | `/api/auth/refresh` | POST | Cookie | Token frissítés |
 | `/api/auth/logout` | POST | — | Kijelentkezés |
 | `/api/courses` | GET | — | Kurzuslista |
@@ -778,4 +950,10 @@ GitHub webhook fogadása — `workflow_run` események alapján automatikusan fr
 | `/api/admin/courses/{id}` | DELETE | Admin | Kurzus törlés |
 | `/api/admin/modules/{id}` | DELETE | Admin | Modul törlés |
 | `/api/admin/exercises/{id}` | DELETE | Admin | Feladat törlés |
+| `/api/admin/promotion-rules` | GET | Admin | Előléptetési szabályok |
+| `/api/admin/promotion-rules` | POST | Admin | Szabály létrehozás |
+| `/api/admin/promotion-rules/{id}` | GET | Admin | Szabály részletek |
+| `/api/admin/promotion-rules/{id}` | PATCH | Admin | Szabály módosítás |
+| `/api/admin/promotion-rules/{id}` | DELETE | Admin | Szabály törlés |
+| `/api/admin/promotion-log` | GET | Admin | Előléptetési napló |
 | `/api/webhooks/github` | POST | HMAC | GitHub webhook |

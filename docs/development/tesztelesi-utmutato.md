@@ -15,7 +15,7 @@ A projektben **két különálló tesztcsomag** van:
 | **Backend unit tesztek** | `backend/tests/` | API végpontok, üzleti logika, modellek | `make test` |
 | **Verifikációs tesztek** | `tesztek/` | Tanulók projektjének ellenőrzése (labor feladatok) | `pytest tesztek/modul-01/ -v` |
 
-### Backend tesztek (64 db)
+### Backend tesztek (104 db)
 
 | Fájl | Tesztek | Mit tesztel |
 |------|---------|-------------|
@@ -25,6 +25,8 @@ A projektben **két különálló tesztcsomag** van:
 | `test_classroom.py` | 9 | GitHub Classroom webhook, repo_prefix egyeztetés |
 | `test_admin.py` | 11 | Admin statisztikák, felhasználó kezelés, kaszkád törlés |
 | `test_discord.py` | 8 | Discord webhook értesítések (beiratkozás, tanúsítvány, hiba kezelés) |
+| `test_discord_sync.py` | 20 | Discord szerepkör szinkronizáció, profil frissítés, admin sync, előléptetés sync |
+| `test_promotion.py` | 19 | Előléptetési szabályok, automatikus előléptetés, Discord értesítés, admin CRUD |
 | `test_health.py` | 1+ | Health check végpont |
 
 ### Verifikációs tesztek (7 modul)

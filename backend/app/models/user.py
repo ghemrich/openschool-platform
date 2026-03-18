@@ -21,5 +21,6 @@ class User(Base):
     email = Column(String)
     avatar_url = Column(String)
     role = Column(Enum(UserRole), default=UserRole.student, nullable=False)
+    discord_id = Column(String, unique=True, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(UTC))
     last_login = Column(DateTime)

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
@@ -38,7 +38,7 @@ def notify_enrollment(username: str, course_name: str) -> bool:
         "title": "📚 Új beiratkozás",
         "description": f"**{username}** beiratkozott a **{course_name}** kurzusra.",
         "color": 0x3498DB,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
     return _send_embed(embed)
 
@@ -50,9 +50,26 @@ def notify_certificate(username: str, course_name: str, cert_id: str) -> bool:
         "title": "🎓 Tanúsítvány kiállítva",
         "description": f"**{username}** megszerezte a **{course_name}** kurzus tanúsítványát!",
         "color": 0x2ECC71,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "fields": [
             {"name": "Hitelesítés", "value": verify_url, "inline": False},
+        ],
+    }
+    return _send_embed(embed)
+
+
+def notify_promotion(username: str, new_role: str, rule_name: str) -> bool:
+    """Send a Discord notification when a user is promoted by a rule."""
+    role_labels = {"mentor": "mentorrá", "admin": "adminná"}
+    role_label = role_labels.get(new_role, new_role)
+    embed = {
+        "title": "🚀 Előléptetés",
+        "description": f"**{username}** {role_label} vált!",
+        "color": 0x9B59B6,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "fields": [
+            {"name": "Szabály", "value": rule_name, "inline": True},
+            {"name": "Új szerepkör", "value": new_role, "inline": True},
         ],
     }
     return _send_embed(embed)

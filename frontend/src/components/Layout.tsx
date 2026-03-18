@@ -75,6 +75,13 @@ export default function Layout() {
                 )}
                 {user ? (
                   <>
+                    <span className={`role-badge role-badge--${user.role}`}>
+                      {user.role === 'admin'
+                        ? '🛡️ Admin'
+                        : user.role === 'mentor'
+                          ? '🎓 Mentor'
+                          : '📚 Tanuló'}
+                    </span>
                     <Link to="/dashboard" onClick={() => setMenuOpen(false)}>
                       Profilom
                     </Link>

@@ -11,6 +11,7 @@ from app.config import settings
 from app.database import engine  # noqa: F401
 from app.models.certificate import Certificate  # noqa: F401
 from app.models.course import Course, Enrollment, Exercise, Module, Progress  # noqa: F401
+from app.models.promotion import PromotionLog, PromotionRule, PromotionRuleRequirement  # noqa: F401
 from app.routers import admin, auth, certificates, courses, dashboard, webhooks
 
 logging.basicConfig(

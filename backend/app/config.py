@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     github_client_secret: str = ""
     webhook_skip_verify: bool = False
     discord_webhook_url: str = ""
+    discord_bot_token: str = ""
+    discord_guild_id: str = ""
+    discord_role_map: str = ""  # Format: "student:ROLE_ID,mentor:ROLE_ID,admin:ROLE_ID"
 
     @model_validator(mode="after")
     def validate_production_secrets(self) -> "Settings":

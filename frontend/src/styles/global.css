@@ -96,6 +96,30 @@ a:hover {
   transform: translateY(-1px);
 }
 
+.role-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.role-badge--student {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.role-badge--mentor {
+  background: rgba(155, 89, 182, 0.15);
+  color: #9b59b6;
+}
+
+.role-badge--admin {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
 .btn-logout {
   padding: 6px 16px;
   background: transparent;
