@@ -9,6 +9,7 @@ Create Date: 2026-03-18 10:00:00.000000
 from collections.abc import Sequence
 
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 from alembic import op
 
@@ -18,6 +19,9 @@ down_revision: str | None = "cefa39428d67"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
+# Re-use the existing userrole enum type (created in the users table migration).
+userrole = postgresql.ENUM("student", "mentor", "admin", name="userrole", create_type=False)
+
 
 def upgrade() -> None:
     op.create_table(
@@ -25,11 +29,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
-        sa.Column(
-            "target_role",
-            sa.Enum("student", "mentor", "admin", name="userrole", create_type=False),
-            nullable=False,
-        ),
+        sa.Column("target_role", userrole, nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("created_at", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
@@ -51,16 +51,8 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("rule_id", sa.Integer(), nullable=False),
-        sa.Column(
-            "previous_role",
-            sa.Enum("student", "mentor", "admin", name="userrole", create_type=False),
-            nullable=False,
-        ),
-        sa.Column(
-            "new_role",
-            sa.Enum("student", "mentor", "admin", name="userrole", create_type=False),
-            nullable=False,
-        ),
+        sa.Column("previous_role", userrole, nullable=False),
+        sa.Column("new_role", userrole, nullable=False),
         sa.Column("promoted_at", sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
         sa.ForeignKeyConstraint(["rule_id"], ["promotion_rules.id"]),
