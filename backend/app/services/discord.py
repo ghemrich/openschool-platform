@@ -56,3 +56,20 @@ def notify_certificate(username: str, course_name: str, cert_id: str) -> bool:
         ],
     }
     return _send_embed(embed)
+
+
+def notify_promotion(username: str, new_role: str, rule_name: str) -> bool:
+    """Send a Discord notification when a user is promoted by a rule."""
+    role_labels = {"mentor": "mentorrá", "admin": "adminná"}
+    role_label = role_labels.get(new_role, new_role)
+    embed = {
+        "title": "🚀 Előléptetés",
+        "description": f"**{username}** {role_label} vált!",
+        "color": 0x9B59B6,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "fields": [
+            {"name": "Szabály", "value": rule_name, "inline": True},
+            {"name": "Új szerepkör", "value": new_role, "inline": True},
+        ],
+    }
+    return _send_embed(embed)

@@ -13,6 +13,7 @@ from app.config import settings
 from app.database import Base
 from app.models.certificate import Certificate  # noqa: F401
 from app.models.course import Course, Enrollment, Exercise, Module, Progress  # noqa: F401
+from app.models.promotion import PromotionLog, PromotionRule, PromotionRuleRequirement  # noqa: F401
 from app.models.user import User  # noqa: F401 — needed for autogenerate
 
 # this is the Alembic Config object

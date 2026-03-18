@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import type { DashboardCourse, Certificate, ModuleProgress, Course } from '../lib/types';
+import type { DashboardCourse, Certificate, ModuleProgress, Course, User } from '../lib/types';
 import { apiFetch } from '../lib/api';
 
 function statusPrefix(status: string): string {
@@ -45,12 +45,14 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [syncMsg, setSyncMsg] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   const loadDashboard = useCallback(async () => {
     try {
-      const [dashRes, certRes] = await Promise.all([
+      const [dashRes, certRes, meRes] = await Promise.all([
         fetch('/api/me/dashboard', { credentials: 'same-origin' }),
         fetch('/api/me/certificates', { credentials: 'same-origin' }),
+        fetch('/api/auth/me', { credentials: 'same-origin' }),
       ]);
 
       if (dashRes.status === 401 || dashRes.status === 403) {
@@ -60,6 +62,7 @@ export default function DashboardPage() {
 
       const dashData: DashboardCourse[] = await dashRes.json();
       const certData: Certificate[] = certRes.ok ? await certRes.json() : [];
+      if (meRes.ok) setUser(await meRes.json());
       setCourses(dashData);
       setCerts(certData);
 
@@ -157,7 +160,14 @@ export default function DashboardPage() {
 
   return (
     <div className="container page">
-      <h1>Dashboard</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+        <h1 style={{ margin: 0 }}>Dashboard</h1>
+        {user && (
+          <span className={`role-badge role-badge--${user.role}`}>
+            {user.role === 'admin' ? '🛡️ Admin' : user.role === 'mentor' ? '🎓 Mentor' : '📚 Tanuló'}
+          </span>
+        )}
+      </div>
       <button
         className="btn btn-secondary"
         style={{ marginBottom: 20 }}

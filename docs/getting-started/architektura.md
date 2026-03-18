@@ -41,7 +41,8 @@ backend/
 │   ├── models/
 │   │   ├── user.py           # User (github_id, role, stb.)
 │   │   ├── course.py         # Course, Module, Exercise, Enrollment, Progress
-│   │   └── certificate.py    # Certificate (UUID, PDF útvonal)
+│   │   ├── certificate.py    # Certificate (UUID, PDF útvonal)
+│   │   └── promotion.py      # PromotionRule, PromotionRuleRequirement, PromotionLog
 │   ├── routers/
 │   │   ├── admin.py          # /api/admin/* — admin panel (statisztikák, felhasználók, törlés)
 │   │   ├── auth.py           # /api/auth/* — OAuth, bejelentkezés, profil
@@ -51,8 +52,9 @@ backend/
 │   │   └── webhooks.py       # /api/webhooks/* — GitHub webhook fogadás
 │   └── services/
 │       ├── certificate.py    # is_course_completed() — teljesítés ellenőrzés
-│       ├── discord.py        # Discord webhook értesítések (beiratkozás, tanúsítvány)
+│       ├── discord.py        # Discord webhook értesítések (beiratkozás, tanúsítvány, előléptetés)
 │       ├── pdf.py            # PDF generálás fpdf2-vel
+│       ├── promotion.py      # check_and_promote() — automatikus előléptetés
 │       ├── qr.py             # QR kód generálás
 │       ├── github.py         # GitHub Actions állapot lekérdezés
 │       └── progress.py       # Haladás frissítés GitHub CI alapján
@@ -98,11 +100,15 @@ erDiagram
   User ||--o{ Enrollment : "beiratkozik"
   User ||--o{ Progress : "haladás"
   User ||--o{ Certificate : "tanúsítvány"
+  User ||--o{ PromotionLog : "előléptetés"
   Course ||--o{ Module : "tartalmaz"
   Course ||--o{ Enrollment : "beiratkozás"
   Course ||--o{ Certificate : "tanúsítvány"
+  Course ||--o{ PromotionRuleRequirement : "feltétel"
   Module ||--o{ Exercise : "tartalmaz"
   Exercise ||--o{ Progress : "haladás"
+  PromotionRule ||--o{ PromotionRuleRequirement : "követelmény"
+  PromotionRule ||--o{ PromotionLog : "napló"
 ```
 
 **Táblák részletesen:**
@@ -116,6 +122,9 @@ erDiagram
 | `enrollments` | user_id, course_id, enrolled_at |
 | `progress` | user_id, exercise_id, status (not_started/in_progress/completed), github_repo |
 | `certificates` | cert_id (UUID), user_id, course_id, issued_at, pdf_path |
+| `promotion_rules` | name, description, target_role, is_active |
+| `promotion_rule_requirements` | rule_id, course_id |
+| `promotion_log` | user_id, rule_id, previous_role, new_role, promoted_at |
 
 ---
 

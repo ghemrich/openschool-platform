@@ -66,7 +66,8 @@ backend/
 │   ├── models/
 │   │   ├── user.py           # User (github_id, role, stb.)
 │   │   ├── course.py         # Course, Module, Exercise, Enrollment, Progress
-│   │   └── certificate.py    # Certificate (UUID, PDF útvonal)
+│   │   ├── certificate.py    # Certificate (UUID, PDF útvonal)
+│   │   └── promotion.py      # PromotionRule, PromotionRuleRequirement, PromotionLog
 │   ├── routers/
 │   │   ├── admin.py          # /api/admin/* — statisztikák, felhasználók, törlés
 │   │   ├── auth.py           # /api/auth/* — OAuth, bejelentkezés, profil
@@ -76,8 +77,9 @@ backend/
 │   │   └── webhooks.py       # /api/webhooks/* — GitHub webhook fogadás
 │   └── services/
 │       ├── certificate.py    # is_course_completed() — teljesítés ellenőrzés
-│       ├── discord.py        # Discord webhook értesítések (beiratkozás, tanúsítvány)
+│       ├── discord.py        # Discord webhook értesítések (beiratkozás, tanúsítvány, előléptetés)
 │       ├── pdf.py            # PDF generálás fpdf2-vel
+│       ├── promotion.py      # check_and_promote() — automatikus előléptetés tanúsítvány alapján
 │       ├── qr.py             # QR kód generálás
 │       ├── github.py         # GitHub Actions állapot lekérdezés + org meghívás
 │       └── progress.py       # Haladás frissítés GitHub CI alapján
@@ -132,6 +134,9 @@ Az `environment` beállítás hatása:
 | `enrollments` | user_id, course_id, enrolled_at |
 | `progress` | user_id, exercise_id, status (not_started/in_progress/completed), github_repo |
 | `certificates` | cert_id (UUID), user_id, course_id, issued_at, pdf_path |
+| `promotion_rules` | name, description, target_role, is_active |
+| `promotion_rule_requirements` | rule_id, course_id |
+| `promotion_log` | user_id, rule_id, previous_role, new_role, promoted_at |
 
 ### Kapcsolatok
 
@@ -207,6 +212,12 @@ Minden router a `backend/app/routers/` mappában van és a `main.py`-ban regiszt
 | `/api/admin/stats` | GET | Platform statisztikák |
 | `/api/admin/users` | GET | Felhasználók (lapozható, rendezhető) |
 | `/api/admin/users/{id}/role` | PATCH | Szerepkör módosítása |
+| `/api/admin/promotion-rules` | GET | Előléptetési szabályok listázása |
+| `/api/admin/promotion-rules` | POST | Új előléptetési szabály létrehozása |
+| `/api/admin/promotion-rules/{id}` | GET | Előléptetési szabály részletei |
+| `/api/admin/promotion-rules/{id}` | PATCH | Előléptetési szabály módosítása |
+| `/api/admin/promotion-rules/{id}` | DELETE | Előléptetési szabály törlése |
+| `/api/admin/promotion-log` | GET | Előléptetési napló (lapozható) |
 | `/api/admin/courses/{id}` | DELETE | Kurzus törlése (kaszkád) |
 | `/api/admin/modules/{id}` | DELETE | Modul törlése |
 | `/api/admin/exercises/{id}` | DELETE | Feladat törlése |
@@ -230,7 +241,8 @@ A webhook a `workflow_run` eseményt figyeli (`action=completed`, `conclusion=su
 | **qr** | `services/qr.py` | QR kód generálás a verifikációs URL-hez |
 | **github** | `services/github.py` | GitHub Actions workflow állapot lekérdezés egyéni repókhoz + `invite_user_to_org()` — felhasználó automatikus meghívása a GitHub szervezetbe |
 | **progress** | `services/progress.py` | `update_progress_for_user()` — GitHub CI alapján haladás frissítés |
-| **discord** | `services/discord.py` | Discord webhook értesítések — `notify_enrollment()` beiratkozáskor, `notify_certificate()` tanúsítvány kiállításakor |
+| **promotion** | `services/promotion.py` | `check_and_promote()` — tanúsítvány-alapú automatikus előléptetés, szabály-motor |
+| **discord** | `services/discord.py` | Discord webhook értesítések — `notify_enrollment()` beiratkozáskor, `notify_certificate()` tanúsítvány kiállításakor, `notify_promotion()` előléptetéskor |
 
 ---
 
@@ -312,7 +324,9 @@ backend/tests/
 ├── test_certificates.py  # Tanúsítványok (PDF, QR)
 ├── test_classroom.py     # GitHub Classroom integráció
 ├── test_courses.py       # Kurzusok (CRUD, beiratkozás)
-└── test_health.py        # Health endpoint
+├── test_discord.py       # Discord értesítések
+├── test_health.py        # Health endpoint
+└── test_promotion.py     # Előléptetési rendszer (szabályok, admin CRUD, automatikus előléptetés)
 ```
 
 ### Tesztírási konvenciók
@@ -366,6 +380,7 @@ backend/alembic/versions/
 ├── 38fa8a895630_add_course_module_exercise_enrollment_.py
 ├── a1b2c3d4e5f6_add_github_token_and_classroom_url.py
 └── cefa39428d67_add_certificates_table_and_exercise_.py
+└── d1e2f3a4b5c6_add_promotion_rules_and_log_tables.py
 ```
 
 > **Fontos:** Minden modell változtatáshoz (új oszlop, tábla módosítás) migráció szükséges!

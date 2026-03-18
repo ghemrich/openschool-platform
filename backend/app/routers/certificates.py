@@ -13,6 +13,7 @@ from app.models.course import Course
 from app.models.user import User
 from app.services.certificate import is_course_completed
 from app.services.discord import notify_certificate
+from app.services.promotion import check_and_promote
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +92,13 @@ def request_certificate(
 
     notify_certificate(current_user.username, course.name, cert.cert_id)
 
-    return {"cert_id": cert.cert_id, "course_id": course_id, "issued_at": cert.issued_at.isoformat()}
+    # Check if this certificate triggers an automatic promotion.
+    promotion = check_and_promote(db, current_user)
+
+    result = {"cert_id": cert.cert_id, "course_id": course_id, "issued_at": cert.issued_at.isoformat()}
+    if promotion:
+        result["promoted_to"] = promotion.new_role.value
+    return result
 
 
 @router.get("/api/me/certificates/{cert_id}/pdf")
