@@ -32,7 +32,10 @@ export default function Layout() {
       <header className="site-header">
         <div className="container header-inner">
           <Link to="/" className="logo">
-            {SITE.logofull}
+
+              <img src="logo-full.svg" alt="logo" id="logo-full"></img>
+
+
           </Link>
           <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
             &#9776;

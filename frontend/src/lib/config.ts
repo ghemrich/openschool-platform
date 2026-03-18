@@ -1,7 +1,9 @@
 // Site configuration — edit these values when forking the project
 export const SITE = {
-  logo: '<img src="/logo-embl.svg" alt="logo">',
-  logofull: '<img src="/logo-full.svg" alt="logo"',
+  logofull: 'logo-full.svg',
+  logo: 'logo-embl.svg',
+  name: 'OpenSchool',
+  github: 'https://github.com/ghemrich/openschool-platform',
   knowledge: 'https://github.com/ghemrich/openschool-knowledge',
   discord: 'https://discord.gg/BrKd45S6',
 };
