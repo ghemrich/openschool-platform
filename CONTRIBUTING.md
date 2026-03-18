@@ -1,7 +1,5 @@
 # Hozzájárulás az OpenSchool Platformhoz
 
-> 📖 **Dokumentáció:** [Főoldal](README.md) · [Architektúra](docs/getting-started/architektura.md) · [Telepítés](docs/getting-started/telepitesi-utmutato.md) · [Környezeti változók](docs/getting-started/kornyezeti-valtozok.md) · [Fejlesztői útmutató](docs/development/fejlesztoi-utmutato.md) · [Backend](docs/development/backend-fejlesztes.md) · [Frontend](docs/development/frontend-fejlesztes.md) · [Tesztelés](docs/development/tesztelesi-utmutato.md) · [API referencia](docs/reference/api-referencia.md) · [Adatbázis](docs/reference/adatbazis-sema.md) · [Karbantartás](docs/operations/karbantartas-utmutato.md) · [Automatizálás](docs/operations/automatizalas-beallitas.md) · [GitHub Classroom](docs/integrations/github-classroom-integraciot.md) · [Discord](docs/integrations/discord-integracio.md) · [Felhasználói útmutató](docs/guides/felhasznaloi-utmutato.md) · [Dokumentálás](docs/guides/dokumentacios-utmutato.md) · [Roadmap](docs/jovokep-es-fejlesztesi-terv.md) · [Hozzájárulás](CONTRIBUTING.md)
-
 Köszönjük, hogy hozzá szeretnél járulni az OpenSchool fejlesztéséhez! Ez az útmutató segít az indulásban.
 
 ## Hogyan indulj el
@@ -16,7 +14,7 @@ cd openschool-platform
 
 ### 2. Lokális fejlesztői környezet felállítása
 
-Részletes útmutató: [Fejlesztői útmutató](docs/development/fejlesztoi-utmutato.md)
+Részletes útmutató: [Telepítés](docs/setup.md)
 
 Gyors összefoglalás:
 
@@ -122,8 +120,7 @@ Példa: `feat: add user profile page`
 - [ ] A tesztek zöldek (`pytest -v`)
 - [ ] A linter nem jelez hibát (`ruff check .` + `npm run lint`)
 - [ ] Új publikus függvényeknek van docstring-jük
-- [ ] Az érintett dokumentáció frissítve van (lásd: [Dokumentálási útmutató](docs/guides/dokumentacios-utmutato.md))
-- [ ] A `README.md` API táblázata és docs indexe naprakész
+- [ ] Az érintett dokumentáció frissítve van
 - [ ] A PR leírás tartalmazza a változtatás célját
 
 ## Code review

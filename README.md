@@ -37,63 +37,32 @@ docker compose up --build -d
 curl http://localhost:8000/health
 ```
 
-Lokális fejlesztéshez lásd: [Fejlesztői útmutató](docs/development/fejlesztoi-utmutato.md)
+Lokális fejlesztéshez lásd: [Telepítés és fejlesztői környezet](docs/setup.md)
 
 ## Közösség
 
-Csatlakozz az hivatalos Discord szerverünkhöz: [discord.gg/BrKd45S6](https://discord.gg/BrKd45S6)
+Csatlakozz a Discord szerverünkhöz: [discord.gg/BrKd45S6](https://discord.gg/BrKd45S6)
 
 ## Hozzájárulás
 
-Szívesen fogadjuk a hozzájárulásokat! Olvasd el a [CONTRIBUTING.md](CONTRIBUTING.md) fájlt a részletekért.
+Szívesen fogadjuk a hozzájárulásokat! Lásd: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Dokumentáció
 
-### 🏠 Kezdőlépések
-
 | Dokumentum | Leírás |
 |---|---|
-| [Architektúra](docs/getting-started/architektura.md) | Rendszer felépítés, adatmodell, auth folyamat |
-| [Telepítési útmutató](docs/getting-started/telepitesi-utmutato.md) | Helyi fejlesztés (Docker, Python, React) |
-| [Éles telepítés](docs/getting-started/eles-telepites.md) | VPS, SSH, DNS, SSL, CI/CD, hibaelhárítás |
-| [Staging telepítés](docs/getting-started/staging-telepites.md) | Staging környezet beüzemelése |
-| [Környezeti változók](docs/getting-started/kornyezeti-valtozok.md) | Env var referencia, Docker, GitHub Actions secrets |
+| [Telepítés](docs/setup.md) | Fejlesztői környezet, env vars, Docker, Makefile |
+| [Architektúra](docs/architecture.md) | Rendszer felépítés, adatmodell, auth, infrastruktúra |
+| [Backend](docs/backend.md) | FastAPI routers, services, Ruff, pytest, Alembic |
+| [Frontend](docs/frontend.md) | React + TypeScript, oldalak, API, tesztelés |
+| [Telepítés és üzemeltetés](docs/deployment.md) | VPS, SSH, DNS, SSL, CI/CD, staging, cron, secrets |
+| [Karbantartás](docs/operations.md) | Workflow, minőségkapuk, monitoring, incidenskezelés |
+| [API referencia](docs/api.md) | Összes végpont, sémák, státuszkódok |
+| [Adatbázis séma](docs/database.md) | Táblák, kapcsolatok, migrációk |
+| [Integrációk](docs/integrations.md) | Discord, GitHub Classroom |
+| [Roadmap](docs/roadmap.md) | Jövőkép, megvalósított és tervezett funkciók |
 
-### 🛠️ Fejlesztés
-
-| Dokumentum | Leírás |
-|---|---|
-| [Fejlesztői útmutató](docs/development/fejlesztoi-utmutato.md) | Környezet beállítás, VS Code, Docker, CI/CD |
-| [Backend](docs/development/backend-fejlesztes.md) | FastAPI, modellek, Ruff, pytest, Alembic |
-| [Frontend](docs/development/frontend-fejlesztes.md) | React + TypeScript oldalak, komponensek, admin panel |
-| [Tesztelés](docs/development/tesztelesi-utmutato.md) | Tesztek futtatása, fixture-ök, CI integráció |
-
-### 📚 Referencia
-
-| Dokumentum | Leírás |
-|---|---|
-| [API referencia](docs/reference/api-referencia.md) | Összes végpont, sémák, státuszkódok |
-| [Adatbázis séma](docs/reference/adatbazis-sema.md) | Táblák, kapcsolatok, Alembic migrációk |
-
-### ⚙️ Üzemeltetés & Integrációk
-
-| Dokumentum | Leírás |
-|---|---|
-| [Karbantartás](docs/operations/karbantartas-utmutato.md) | Monitoring, backup, biztonsági audit |
-| [Automatizálás](docs/operations/automatizalas-beallitas.md) | Cron jobok, VPS bootstrap, secrets kezelés |
-| [GitHub Classroom](docs/integrations/github-classroom-integraciot.md) | Feladatok összekötése, webhook, mentori útmutató |
-| [Discord](docs/integrations/discord-integracio.md) | Discord szerver, webhook, CI/CD értesítések |
-
-### 📖 Útmutatók
-
-| Dokumentum | Leírás |
-|---|---|
-| [Felhasználói útmutató](docs/guides/felhasznaloi-utmutato.md) | Oldalak, felhasználói folyamatok, admin panel |
-| [Dokumentálás](docs/guides/dokumentacios-utmutato.md) | Docstring-ek, Markdown konvenciók, navsáv |
-| [Jövőkép és roadmap](docs/jovokep-es-fejlesztesi-terv.md) | Megvalósított funkciók, tervezett fejlesztések |
-| [Hozzájárulás](CONTRIBUTING.md) | Fork, branch stratégia, PR küldés, kódstílus |
-
-### 📦 Kapcsolódó repók
+### Kapcsolódó repók
 
 | Repó | Leírás |
 |---|---|

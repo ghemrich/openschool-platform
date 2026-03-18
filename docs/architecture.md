@@ -1,10 +1,8 @@
-# OpenSchool Platform — Architektúra
-
-> 📖 **Dokumentáció:** [Főoldal](../../README.md) · **Architektúra** · [Telepítés](telepitesi-utmutato.md) · [Környezeti változók](kornyezeti-valtozok.md) · [Fejlesztői útmutató](../development/fejlesztoi-utmutato.md) · [Backend](../development/backend-fejlesztes.md) · [Frontend](../development/frontend-fejlesztes.md) · [Tesztelés](../development/tesztelesi-utmutato.md) · [API referencia](../reference/api-referencia.md) · [Adatbázis](../reference/adatbazis-sema.md) · [Karbantartás](../operations/karbantartas-utmutato.md) · [Automatizálás](../operations/automatizalas-beallitas.md) · [GitHub Classroom](../integrations/github-classroom-integraciot.md) · [Discord](../integrations/discord-integracio.md) · [Felhasználói útmutató](../guides/felhasznaloi-utmutato.md) · [Dokumentálás](../guides/dokumentacios-utmutato.md) · [Roadmap](../jovokep-es-fejlesztesi-terv.md) · [Hozzájárulás](../../CONTRIBUTING.md)
-
-## Rendszer áttekintés
+# Architektúra
 
 Az OpenSchool egy oktatási platform, ahol a tanulók valódi fejlesztői munkafolyamatokon keresztül tanulnak programozni. A platform kurzusokat kezel, követi a haladást, GitHub-bal integrálódik az azonosításhoz és a CI-alapú értékeléshez, valamint hitelesíthető tanúsítványokat állít ki.
+
+## Rendszer áttekintés
 
 ```mermaid
 graph LR
@@ -22,8 +20,6 @@ graph LR
 3. Minden más kérés a React + Vite által épített **statikus fájlokat** szolgálja ki (SPA fallback-kel)
 4. A backend a **PostgreSQL**-lel kommunikál az adattároláshoz
 5. A backend a **GitHub API**-t hívja az OAuth-hoz és a CI állapot ellenőrzéshez
-
----
 
 ## Backend (FastAPI)
 
@@ -44,16 +40,16 @@ backend/
 │   │   ├── certificate.py    # Certificate (UUID, PDF útvonal)
 │   │   └── promotion.py      # PromotionRule, PromotionRuleRequirement, PromotionLog
 │   ├── routers/
-│   │   ├── admin.py          # /api/admin/* — admin panel (statisztikák, felhasználók, törlés)
+│   │   ├── admin.py          # /api/admin/* — admin panel
 │   │   ├── auth.py           # /api/auth/* — OAuth, bejelentkezés, profil
 │   │   ├── certificates.py   # /api/me/certificates/*, /api/verify/*
 │   │   ├── courses.py        # /api/courses/* — CRUD, beiratkozás, modulok
 │   │   ├── dashboard.py      # /api/me/* — haladás, dashboard
 │   │   └── webhooks.py       # /api/webhooks/* — GitHub webhook fogadás
 │   └── services/
-│       ├── certificate.py    # is_course_completed() — teljesítés ellenőrzés
-│       ├── discord.py        # Discord webhook értesítések (beiratkozás, tanúsítvány, előléptetés)
-│       ├── discord_bot.py    # Discord Bot API — szerepkör szinkronizáció (sync_discord_role, lookup_discord_member)
+│       ├── certificate.py    # is_course_completed()
+│       ├── discord.py        # Discord webhook értesítések
+│       ├── discord_bot.py    # Discord Bot API — szerepkör szinkronizáció
 │       ├── pdf.py            # PDF generálás fpdf2-vel
 │       ├── promotion.py      # check_and_promote() — automatikus előléptetés
 │       ├── qr.py             # QR kód generálás
@@ -83,7 +79,6 @@ sequenceDiagram
   G-->>B: Profil (id, username, email, avatar)
   B->>B: User létrehozás/frissítés + JWT generálás
   B-->>D: 302 → /dashboard (+ access_token és refresh_token cookie-k)
-  D->>D: Cookie-k automatikusan tárolva
 ```
 
 ### Szerepkör-alapú hozzáférés
@@ -112,22 +107,20 @@ erDiagram
   PromotionRule ||--o{ PromotionLog : "napló"
 ```
 
-**Táblák részletesen:**
-
 | Tábla | Kulcs mezők |
 |-------|-------------|
-| `users` | github_id, username, email, avatar_url, role (student/mentor/admin) |
+| `users` | github_id, username, email, avatar_url, role, discord_id |
 | `courses` | name, description |
 | `modules` | course_id, name, order |
 | `exercises` | module_id, name, repo_prefix, order, required, classroom_url |
 | `enrollments` | user_id, course_id, enrolled_at |
-| `progress` | user_id, exercise_id, status (not_started/in_progress/completed), github_repo |
+| `progress` | user_id, exercise_id, status, github_repo |
 | `certificates` | cert_id (UUID), user_id, course_id, issued_at, pdf_path |
 | `promotion_rules` | name, description, target_role, is_active |
 | `promotion_rule_requirements` | rule_id, course_id |
 | `promotion_log` | user_id, rule_id, previous_role, new_role, promoted_at |
 
----
+Részletes séma: [database.md](database.md)
 
 ## Frontend (React + TypeScript + Vite)
 
@@ -135,21 +128,17 @@ erDiagram
 
 | Útvonal | Azonosítás | Leírás |
 |---------|------------|--------|
-| `/` | Nem | Kezdőoldal — bemutató, hogyan működik, kurzus előnézet |
+| `/` | Nem | Kezdőoldal — bemutató, kurzus előnézet |
 | `/courses` | Nem | Kurzuslista |
-| `/courses/:id` | Nem | Kurzus részletei modulokkal, gyakorlatokkal, beiratkozás gomb |
-| `/login` | Nem | GitHub OAuth bejelentkezés, cookie-alapú hitelesítés |
-| `/dashboard` | Igen | Beiratkozott kurzusok, haladási sávok, tanúsítványok |
+| `/courses/:id` | Nem | Kurzus részletei modulokkal, beiratkozás |
+| `/login` | Nem | GitHub OAuth bejelentkezés |
+| `/dashboard` | Igen | Beiratkozott kurzusok, haladás, tanúsítványok |
 | `/verify/[id]` | Nem | Nyilvános tanúsítvány hitelesítés |
 | `/admin` | Igen (admin) | Admin dashboard — statisztikák |
-| `/admin/users` | Igen (admin) | Felhasználók kezelése, szerepkörök módosítása |
+| `/admin/users` | Igen (admin) | Felhasználók kezelése |
 | `/admin/courses` | Igen (admin) | Kurzusok, modulok, gyakorlatok kezelése |
 
-### SPA kimenet
-
-A Vite egyetlen HTML fájlt és optimalizált JS/CSS bundle-t generál. A build kimenetet az nginx szolgálja ki SPA fallback-kel (`try_files $uri $uri/ /index.html`). A böngészőből érkező API hívások a `/api/*` útvonalra mennek, amit az nginx a backend-re proxyzi.
-
----
+A Vite egyetlen HTML + JS/CSS bundle-t generál. Az nginx SPA fallback-kel szolgálja ki (`try_files $uri $uri/ /index.html`).
 
 ## Infrastruktúra
 
@@ -162,13 +151,18 @@ A Vite egyetlen HTML fájlt és optimalizált JS/CSS bundle-t generál. A build 
 | `nginx` | nginx:alpine | Reverse proxy + statikus fájl kiszolgálás |
 | `frontend` | Node 20 (csak build) | React + Vite build (SPA) |
 
-### Éles vs. fejlesztői különbségek (`docker-compose.prod.yml`)
+### Éles vs. fejlesztői különbségek
 
-- `restart: always` minden szolgáltatáson
-- A backend portja nem elérhető kívülről (csak nginx-en keresztül)
-- Nincs kód volume mount (az image-be beépítve)
-- Healthcheck-ek konfigurálva
-- Log rotáció bekapcsolva
+| Szempont | Fejlesztés | Éles |
+|----------|------------|------|
+| Docker Compose fájl | `docker-compose.yml` | `docker-compose.prod.yml` |
+| `ENVIRONMENT` | `development` | `production` |
+| Swagger UI (`/docs`) | Elérhető | Kikapcsolt |
+| uvicorn `--reload` | Igen | Nem |
+| Backend/DB port | Kintről is elérhető | Csak belső |
+| Health check | Nincs | 30s interval |
+| Restart policy | Nincs | `always` |
+| Log rotáció | Nincs | 10MB / 3 fájl |
 
 ### nginx útvonalak
 
@@ -178,8 +172,6 @@ A Vite egyetlen HTML fájlt és optimalizált JS/CSS bundle-t generál. A build 
 /health     → proxy_pass http://backend:8000
 /*          → statikus fájlok (Vite build) SPA fallback-kel
 ```
-
----
 
 ## CI/CD
 
@@ -197,37 +189,22 @@ graph LR
   Migrate --> Health["health check"]
 ```
 
-### CI Pipeline (`.github/workflows/ci.yml`)
+**CI** (minden push/PR, 4 párhuzamos job): backend lint → backend test, frontend lint → frontend test.
 
-Mikor fut: push a `main` vagy `develop`-re, PR-ek a `main` vagy `develop`-re
-
-4 párhuzamos job:
-
-1. **Backend lint** — `ruff check` + `ruff format --check`
-2. **Frontend lint** — ESLint + Prettier format check + `tsc --noEmit`
-3. **Backend test** — Python 3.12 beállítás → pytest futtatás → Discord értesítés
-4. **Frontend test** — Node.js 20 beállítás → Vitest futtatás + `npm run build`
-
-### CD Pipeline (`.github/workflows/cd.yml`)
-
-Mikor fut: push a `main` vagy `develop` ágra (csak ha a `VPS_HOST` repository variable be van állítva)
-
-1. SSH belépés a VPS-re → git pull → docker compose build → alembic migrate → health check → Discord értesítés
-
----
+**CD** (push `main`-re, ha `VPS_HOST` be van állítva): SSH → git pull → docker compose build → alembic migrate → health check → Discord értesítés.
 
 ## Kulcs függőségek
 
 | Csomag | Cél |
 |--------|-----|
 | `fastapi` | Web keretrendszer |
-| `sqlalchemy` | ORM (adatbázis kezelés) |
+| `sqlalchemy` | ORM |
 | `alembic` | Adatbázis migrációk |
-| `pydantic-settings` | Konfiguráció környezeti változókból |
+| `pydantic-settings` | Konfiguráció .env-ből |
 | `PyJWT` | JWT tokenek |
-| `httpx` | HTTP kliens a GitHub API-hoz |
+| `httpx` | HTTP kliens (GitHub API) |
 | `fpdf2` | Tanúsítvány PDF generálás |
-| `qrcode` | QR kód generálás tanúsítványokhoz |
+| `qrcode` | QR kód tanúsítványokhoz |
 | `psycopg2-binary` | PostgreSQL driver |
-| `slowapi` | Rate limiting (API végpontok védelme) |
+| `slowapi` | Rate limiting |
 | `pytest` | Tesztelés |
