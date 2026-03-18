@@ -96,6 +96,7 @@ Egy új kurzus indításához a GitHub Classroom-ban és az OpenSchool admin pan
 | Admin dashboard | `/admin` | ✅ Kész |
 | Admin felhasználók | `/admin/users` | ✅ Kész |
 | Admin kurzusok | `/admin/courses` | ✅ Kész |
+| Admin előléptetés | `/admin/promotion` | ✅ Kész |
 
 ### ✅ Infrastruktúra
 
@@ -150,7 +151,7 @@ Egy új kurzus indításához a GitHub Classroom-ban és az OpenSchool admin pan
 | Kurzus tesztek (14 teszt) | ✅ |
 | Tanúsítvány tesztek (12 teszt) | ✅ |
 | GitHub Classroom tesztek (9 teszt) | ✅ |
-| Admin tesztek (11 teszt) | ✅ |
+| Admin tesztek (21 teszt) | ✅ |
 | Discord értesítés tesztek (8 teszt) | ✅ |
 | Health check teszt | ✅ |
 | Egyéb tesztek | ✅ |

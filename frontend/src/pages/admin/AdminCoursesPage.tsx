@@ -206,7 +206,10 @@ export default function AdminCoursesPage() {
         </Link>
         <Link to="/admin/courses" className="btn btn-primary">
           Kurzusok
-        </Link>
+        </Link>{' '}
+        <Link to="/admin/promotion" className="btn btn-secondary">
+          Előléptetés
+        </Link>{' '}
       </div>
 
       <div className="card" style={{ marginBottom: 24 }}>

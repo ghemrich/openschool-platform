@@ -74,6 +74,16 @@ export interface AdminStats {
   exercises: number;
 }
 
+export interface PromotionRule {
+  id: number;
+  name: string;
+  description: string | null;
+  target_role: 'student' | 'mentor' | 'admin';
+  is_active: boolean;
+  created_at: string | null;
+  course_ids: number[];
+}
+
 export interface VerifyResponse {
   name: string;
   course: string;

@@ -97,6 +97,9 @@ export default function AdminUsersPage() {
         <Link to="/admin/courses" className="btn btn-secondary">
           Kurzusok
         </Link>
+        <Link to="/admin/promotion" className="btn btn-secondary">
+          Előléptetés
+        </Link>
       </div>
 
       <div className="card" style={{ overflowX: 'auto' }}>

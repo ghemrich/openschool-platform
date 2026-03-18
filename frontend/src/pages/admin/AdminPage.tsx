@@ -64,6 +64,9 @@ export default function AdminPage() {
         <Link to="/admin/courses" className="btn btn-secondary">
           Kurzusok
         </Link>
+        <Link to="/admin/promotion" className="btn btn-secondary">
+          Előléptetés
+        </Link>
       </div>
 
       <h2 style={{ marginBottom: 20 }}>Áttekintés</h2>

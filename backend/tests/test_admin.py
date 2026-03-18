@@ -2,6 +2,7 @@ import pytest
 
 from app.auth.jwt import create_access_token
 from app.models.course import Course, Exercise, Module
+from app.models.promotion import PromotionRule, PromotionRuleRequirement
 from app.models.user import User, UserRole
 
 
@@ -191,3 +192,135 @@ def test_delete_exercise(client, admin, db_session):
     response = client.delete(f"/api/admin/exercises/{exercise.id}", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert db_session.query(Exercise).filter(Exercise.id == exercise.id).first() is None
+
+
+# --- Promotion rules ---
+
+
+def test_list_promotion_rules_empty(client, admin):
+    token = create_access_token(admin.id)
+    response = client.get("/api/admin/promotion-rules", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_create_promotion_rule(client, admin, db_session):
+    c1 = Course(name="Course A")
+    c2 = Course(name="Course B")
+    db_session.add_all([c1, c2])
+    db_session.commit()
+    db_session.refresh(c1)
+    db_session.refresh(c2)
+
+    token = create_access_token(admin.id)
+    response = client.post(
+        "/api/admin/promotion-rules",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "All → Mentor",
+            "description": "Complete all courses",
+            "target_role": "mentor",
+            "course_ids": [c1.id, c2.id],
+        },
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == "All → Mentor"
+    assert data["target_role"] == "mentor"
+    assert data["is_active"] is True
+    assert set(data["course_ids"]) == {c1.id, c2.id}
+
+
+def test_create_promotion_rule_invalid_role(client, admin, db_session):
+    c = Course(name="C")
+    db_session.add(c)
+    db_session.commit()
+
+    token = create_access_token(admin.id)
+    response = client.post(
+        "/api/admin/promotion-rules",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"name": "Bad", "target_role": "superadmin", "course_ids": [c.id]},
+    )
+    assert response.status_code == 400
+
+
+def test_create_promotion_rule_missing_courses(client, admin):
+    token = create_access_token(admin.id)
+    response = client.post(
+        "/api/admin/promotion-rules",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"name": "Empty", "target_role": "mentor", "course_ids": []},
+    )
+    assert response.status_code == 400
+
+
+def test_create_promotion_rule_nonexistent_course(client, admin):
+    token = create_access_token(admin.id)
+    response = client.post(
+        "/api/admin/promotion-rules",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"name": "Bad", "target_role": "mentor", "course_ids": [9999]},
+    )
+    assert response.status_code == 400
+
+
+def test_get_single_promotion_rule(client, admin, db_session):
+    c = Course(name="C")
+    db_session.add(c)
+    db_session.commit()
+    db_session.refresh(c)
+
+    rule = PromotionRule(name="Test", target_role=UserRole.mentor)
+    db_session.add(rule)
+    db_session.commit()
+    db_session.refresh(rule)
+    db_session.add(PromotionRuleRequirement(rule_id=rule.id, course_id=c.id))
+    db_session.commit()
+
+    token = create_access_token(admin.id)
+    response = client.get(f"/api/admin/promotion-rules/{rule.id}", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert response.json()["name"] == "Test"
+
+
+def test_update_promotion_rule(client, admin, db_session):
+    c = Course(name="C")
+    db_session.add(c)
+    db_session.commit()
+    db_session.refresh(c)
+
+    rule = PromotionRule(name="Old", target_role=UserRole.mentor)
+    db_session.add(rule)
+    db_session.commit()
+    db_session.refresh(rule)
+    db_session.add(PromotionRuleRequirement(rule_id=rule.id, course_id=c.id))
+    db_session.commit()
+
+    token = create_access_token(admin.id)
+    response = client.patch(
+        f"/api/admin/promotion-rules/{rule.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"name": "Updated", "is_active": False},
+    )
+    assert response.status_code == 200
+    assert response.json()["name"] == "Updated"
+    assert response.json()["is_active"] is False
+
+
+def test_delete_promotion_rule(client, admin, db_session):
+    rule = PromotionRule(name="ToDelete", target_role=UserRole.mentor)
+    db_session.add(rule)
+    db_session.commit()
+    db_session.refresh(rule)
+
+    token = create_access_token(admin.id)
+    response = client.delete(f"/api/admin/promotion-rules/{rule.id}", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert db_session.query(PromotionRule).filter(PromotionRule.id == rule.id).first() is None
+
+
+def test_promotion_rules_forbidden_for_student(client, student):
+    token = create_access_token(student.id)
+    response = client.get("/api/admin/promotion-rules", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 403
