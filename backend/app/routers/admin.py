@@ -90,8 +90,16 @@ def update_user_role(
         raise HTTPException(status_code=404, detail="User not found")
     if user.id == admin.id:
         raise HTTPException(status_code=400, detail="Cannot change your own role")
+    previous_role = user.role.value
     user.role = UserRole(data.role)
     db.commit()
+
+    # Sync Discord role if user has linked their Discord
+    if user.discord_id:
+        from app.services.discord_bot import sync_discord_role
+
+        sync_discord_role(user.discord_id, data.role, previous_role)
+
     return {"id": user.id, "username": user.username, "role": user.role.value}
 
 

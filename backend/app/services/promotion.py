@@ -6,6 +6,7 @@ from app.models.certificate import Certificate
 from app.models.promotion import PromotionLog, PromotionRule, PromotionRuleRequirement
 from app.models.user import User, UserRole
 from app.services.discord import notify_promotion
+from app.services.discord_bot import sync_discord_role
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,7 @@ def check_and_promote(db: Session, user: User) -> PromotionLog | None:
                 rule.name,
             )
             notify_promotion(user.username, rule.target_role.value, rule.name)
+            sync_discord_role(user.discord_id, rule.target_role.value, previous_role.value)
             return log
 
     return None

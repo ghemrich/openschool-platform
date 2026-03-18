@@ -53,6 +53,7 @@ backend/
 │   └── services/
 │       ├── certificate.py    # is_course_completed() — teljesítés ellenőrzés
 │       ├── discord.py        # Discord webhook értesítések (beiratkozás, tanúsítvány, előléptetés)
+│       ├── discord_bot.py    # Discord Bot API — szerepkör szinkronizáció (sync_discord_role, lookup_discord_member)
 │       ├── pdf.py            # PDF generálás fpdf2-vel
 │       ├── promotion.py      # check_and_promote() — automatikus előléptetés
 │       ├── qr.py             # QR kód generálás

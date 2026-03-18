@@ -32,6 +32,7 @@ erDiagram
         string email
         string avatar_url
         enum role
+        string discord_id UK
         datetime created_at
         datetime last_login
     }
@@ -126,10 +127,11 @@ A GitHub OAuth-tal regisztrált felhasználók. Minden felhasználónak egyedi `
 | `email` | String | Igen | — | Email cím a GitHub profilból (lehet `null`, ha privát) |
 | `avatar_url` | String | Igen | — | GitHub profilkép URL-je. Bejelentkezéskor frissül |
 | `role` | Enum | Nem | `student` | Szerepkör: `student`, `mentor`, `admin`. Admin módosíthatja |
+| `discord_id` | String | Igen | — | Discord felhasználó azonosító (snowflake, 17-20 számjegy). Egyedi. A felhasználó a dashboardon állítja be |
 | `created_at` | DateTime | Igen | `now()` | Regisztráció időpontja (első bejelentkezés) |
 | `last_login` | DateTime | Igen | — | Utolsó bejelentkezés időpontja. Minden login-kor frissül |
 
-**Egyedi megszorítások:** `github_id` (unique), `username` (unique)
+**Egyedi megszorítások:** `github_id` (unique), `username` (unique), `discord_id` (unique)
 
 ---
 
@@ -348,6 +350,7 @@ alembic downgrade -1
 | `a1b2c3d4e5f6` | `github_token` oszlop hozzáadása (`users`, **deprecated — már nem használt**) + `classroom_url` (`exercises`) |
 | `cefa39428d67` | `certificates` tábla + `required` oszlop (`exercises`) |
 | `d1e2f3a4b5c6` | `promotion_rules`, `promotion_rule_requirements`, `promotion_log` táblák |
+| `e2f3a4b5c6d7` | `discord_id` oszlop hozzáadása (`users`, unique) |
 
 ### Migráció létrehozási folyamat
 

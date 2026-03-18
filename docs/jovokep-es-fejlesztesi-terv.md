@@ -223,7 +223,7 @@ A platform növekedési motorja: tanúsítvány-alapú automatikus előlépteté
 - [x] Promotion szabályok adatmodell: tanúsítvány-kombinációk → célszerepkör (pl. "Python Haladó" + "Mentor Képzés" → `mentor`) — `models/promotion.py` (`PromotionRule`, `PromotionRuleRequirement`, `PromotionLog`)
 - [x] Automatikus szerepkör-váltás tanúsítvány kiállításakor (szabály-motor a certificate service-ben) — `services/promotion.py` (`check_and_promote()`)
 - [x] Discord értesítés előléptetéskor (pl. "🎓 @username mentorrá vált!") — `services/discord.py` (`notify_promotion()`)
-- [ ] Discord szerepkör szinkronizáció (platform szerepkör → Discord role)
+- [x] Discord szerepkör szinkronizáció (platform szerepkör → Discord role)
 
 **Mentor onboarding kurzus:**
 
@@ -287,7 +287,7 @@ A platform fejlesztése során a következő külső eszközök integrálása te
 | Discord értesítések (platform) | Platform → Discord (beiratkozás, tanúsítvány) | ✅ Működik |
 | Automatikus előléptetés | Tanúsítvány-alapú szerepkör váltás | ✅ Működik |
 | GitHub org team meghívás | Fejlesztők automatikus meghívása | 🔴 Tervezett |
-| Discord szerepkör szinkronizáció | Platform → Discord role szinkron | 🔴 Tervezett |
+| Discord szerepkör szinkronizáció | Platform → Discord role szinkron | � Kész |
 
 ---
 

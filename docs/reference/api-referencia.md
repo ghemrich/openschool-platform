@@ -119,8 +119,42 @@ Az aktuálisan bejelentkezett felhasználó adatai.
   "username": "diak1",
   "email": "diak1@example.com",
   "avatar_url": "https://avatars.githubusercontent.com/u/12345678",
-  "role": "student"
+  "role": "student",
+  "discord_id": "123456789012345678"
 }
+```
+
+---
+
+### `PATCH /api/auth/me`
+
+Profil frissítés — jelenleg a Discord ID beállítására/törlésére szolgál.
+
+| | |
+|---|---|
+| **Hitelesítés** | Bearer token vagy `access_token` cookie (bármely szerepkör) |
+| **Válasz** | `200` — sikeres módosítás |
+| **Hiba** | `400` — érvénytelen Discord ID formátum, vagy a felhasználó nem tagja a szervernek |
+| | `409` — a Discord ID már másik fiókhoz van rendelve |
+
+**Kérés:**
+
+```json
+{"discord_id": "123456789012345678"}
+```
+
+**Törlés:** `{"discord_id": ""}` — eltávolítja a Discord összekapcsolást.
+
+**Validáció:**
+- A Discord ID numerikus snowflake (17-20 számjegy)
+- A Discord ID egyedi — nem lehet másik fiókhoz rendelve
+- A felhasználónak a szerveren kell lennie (a bot ellenőrzi a tagságot)
+- Sikeres mentés után a platform automatikusan szinkronizálja a szerepkört Discord-ra
+
+**Válasz:**
+
+```json
+{"discord_id": "123456789012345678"}
 ```
 
 ---
@@ -889,6 +923,7 @@ GitHub webhook fogadása — `workflow_run` események alapján automatikusan fr
 | `/api/auth/login` | GET | — | GitHub OAuth redirect |
 | `/api/auth/callback` | GET | — | OAuth callback |
 | `/api/auth/me` | GET | Bearer | Profil |
+| `/api/auth/me` | PATCH | Bearer | Profil frissítés (Discord ID) |
 | `/api/auth/refresh` | POST | Cookie | Token frissítés |
 | `/api/auth/logout` | POST | — | Kijelentkezés |
 | `/api/courses` | GET | — | Kurzuslista |

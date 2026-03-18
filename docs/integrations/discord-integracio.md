@@ -15,9 +15,10 @@ Ez az útmutató az OpenSchool Platform Discord szerverének felállítását, a
 3. [Webhook értesítések](#3-webhook-értesítések)
 4. [CI/CD Discord értesítések](#4-cicd-discord-értesítések)
 5. [Ops monitoring (VPS)](#5-ops-monitoring-vps)
-6. [Discord bot (jövőbeli)](#6-discord-bot-jövőbeli)
-7. [Moderáció és szabályok](#7-moderáció-és-szabályok)
-8. [Hibaelhárítás](#8-hibaelhárítás)
+6. [Platform értesítések](#6-platform-értesítések-beiratkozás-tanúsítvány)
+7. [Discord szerepkör szinkronizáció](#7-discord-szerepkör-szinkronizáció)
+8. [Moderáció és szabályok](#8-moderáció-és-szabályok)
+9. [Hibaelhárítás](#9-hibaelhárítás)
 
 ---
 
@@ -337,7 +338,52 @@ A jövőben egy Discord bot biztosíthatja a kétirányú integrációt:
 
 ---
 
-## 7. Moderáció és szabályok
+## 7. Discord szerepkör szinkronizáció
+
+> ✅ **Implementálva** — a platform automatikusan szinkronizálja a felhasználók szerepkörét a Discord szerverre.
+
+### Működés
+
+A `backend/app/services/discord_bot.py` szolgáltatás a Discord Bot API-n keresztül kezeli a szerepköröket:
+
+1. **Felhasználó összekapcsolás:** A dashboardon a felhasználó megadja a Discord User ID-ját (`PATCH /api/auth/me`)
+2. **Validáció:** A rendszer ellenőrzi, hogy a megadott ID numerikus snowflake (17-20 számjegy), egyedi, és a felhasználó tagja a Discord szervernek
+3. **Szerepkör szinkronizálás:** Automatikusan történik:
+   - Profil összekapcsoláskor (jelenlegi szerepkör hozzáadása)
+   - Előléptetéskor (régi eltávolítása, új hozzáadása)
+   - Admin általi szerepkörváltáskor (régi eltávolítása, új hozzáadása)
+
+### Beállítás
+
+1. **Bot létrehozása:** [Discord Developer Portal](https://discord.com/developers/applications) → New Application → Bot → Reset Token
+2. **Bot meghívása:** OAuth2 → URL Generator → scope: `bot` → jogosultság: `Manage Roles` → generált URL-lel meghívni
+3. **Fontos:** A bot szerepkörnek magasabban kell lennie a szerver szerepkör hierarchiában, mint az általa kezelt szerepkörök!
+4. **Környezeti változók beállítása:**
+
+```bash
+# .env
+DISCORD_BOT_TOKEN=your-bot-token
+DISCORD_GUILD_ID=your-guild-id
+DISCORD_ROLE_MAP="student:STUDENT_ROLE_ID,mentor:MENTOR_ROLE_ID,admin:ADMIN_ROLE_ID"
+```
+
+5. **Discord szerepkör ID-k beszerzése:** Fejlesztői mód → jobb klikk a szerepkörre → ID másolása
+
+Ha a `DISCORD_BOT_TOKEN`, `DISCORD_GUILD_ID` vagy `DISCORD_ROLE_MAP` nincs beállítva, a szinkronizáció csendben átugródik.
+
+### Technikai részletek
+
+- **Fájl:** `backend/app/services/discord_bot.py`
+- **Függvények:** `sync_discord_role()`, `lookup_discord_member()`, `_get_role_map()`, `_is_configured()`
+- **Discord API:** REST v10 — `PUT /guilds/{guild_id}/members/{user_id}/roles/{role_id}` és `DELETE`
+- **HTTP kliens:** `httpx` (10 másodperces timeout)
+- **Tesztek:** `backend/tests/test_discord_sync.py` (20 teszt)
+- **Adatbázis:** `users.discord_id` (String, unique, nullable) — migráció: `e2f3a4b5c6d7`
+- **Frontend:** Dashboard oldalon Discord összekapcsolási kártya
+
+---
+
+## 8. Moderáció és szabályok
 
 ### Szerver szabályzat minta (`#szabályzat` csatornához)
 
@@ -364,7 +410,7 @@ A Discord beépített AutoMod rendszere automatikusan moderál:
 
 ---
 
-## 8. Hibaelhárítás
+## 9. Hibaelhárítás
 
 ### Webhook nem küld üzenetet
 

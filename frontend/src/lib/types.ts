@@ -5,6 +5,7 @@ export interface User {
   email: string | null;
   avatar_url: string | null;
   role: 'student' | 'mentor' | 'admin';
+  discord_id: string | null;
   created_at: string;
   last_login: string | null;
 }

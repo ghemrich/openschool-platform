@@ -11,7 +11,8 @@ from app.auth.dependencies import get_current_user
 from app.auth.jwt import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, create_refresh_token
 from app.config import settings
 from app.database import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
+from app.services.discord_bot import lookup_discord_member, sync_discord_role
 from app.services.github import invite_user_to_org
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -146,7 +147,55 @@ def auth_me(current_user: User = Depends(get_current_user)):
         "email": current_user.email,
         "avatar_url": current_user.avatar_url,
         "role": current_user.role.value,
+        "discord_id": current_user.discord_id,
     }
+
+
+from pydantic import BaseModel
+
+
+class ProfileUpdate(BaseModel):
+    discord_id: str | None = None
+
+
+@router.patch("/me")
+def update_profile(
+    data: ProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Update current user's profile (discord_id)."""
+    if data.discord_id is not None:
+        # Allow clearing by setting to empty string
+        if data.discord_id == "":
+            current_user.discord_id = None
+            db.commit()
+            return {"discord_id": None}
+
+        # Validate: must be a numeric Discord user ID (snowflake)
+        discord_id = data.discord_id.strip()
+        if not discord_id.isdigit() or len(discord_id) < 17 or len(discord_id) > 20:
+            raise HTTPException(status_code=400, detail="Invalid Discord ID — use your numeric user ID (17-20 digits)")
+
+        # Check uniqueness
+        existing = db.query(User).filter(User.discord_id == discord_id, User.id != current_user.id).first()
+        if existing:
+            raise HTTPException(status_code=409, detail="This Discord ID is already linked to another account")
+
+        # Verify the user exists on the Discord server
+        member = lookup_discord_member(discord_id)
+        if member is None and settings.discord_bot_token and settings.discord_guild_id:
+            raise HTTPException(status_code=400, detail="Discord user not found on the server — join first")
+
+        current_user.discord_id = discord_id
+        db.commit()
+
+        # Sync current role to Discord
+        sync_discord_role(discord_id, current_user.role.value)
+
+        return {"discord_id": discord_id}
+
+    return {"discord_id": current_user.discord_id}
 
 
 @router.post("/refresh")
