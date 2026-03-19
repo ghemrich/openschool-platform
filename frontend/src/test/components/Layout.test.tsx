@@ -40,7 +40,7 @@ describe('Layout', () => {
     expect(loginLink).toBeInTheDocument();
   });
 
-  it('shows profile link when authenticated', async () => {
+  it('shows dashboard link when authenticated', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(() =>
@@ -57,8 +57,8 @@ describe('Layout', () => {
         <Layout />
       </MemoryRouter>,
     );
-    const profileLink = await screen.findByText('Profilom');
-    expect(profileLink).toBeInTheDocument();
+    const dashboardLink = await screen.findByText('Dashboard');
+    expect(dashboardLink).toBeInTheDocument();
   });
 
   it('shows admin link for admin users', async () => {
