@@ -2,6 +2,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { Course, User } from '../../lib/types';
 
+interface ClassroomItem {
+  id: number;
+  name: string;
+}
+
+interface AssignmentItem {
+  id: number;
+  title: string;
+  slug: string;
+  invite_link: string;
+  already_imported: boolean;
+}
+
 export default function AdminCoursesPage() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
@@ -311,6 +324,13 @@ export default function AdminCoursesPage() {
                 handleAddExercise(c.id, moduleId, name, repo, classroom, order)
               }
               onDeleteExercise={(exerciseId) => handleDeleteExercise(c.id, exerciseId)}
+              onImportDone={async () => {
+                const res = await fetch(`/api/courses/${c.id}`);
+                if (res.ok) {
+                  const data: Course = await res.json();
+                  setCourseDetails((prev) => ({ ...prev, [c.id]: data }));
+                }
+              }}
             />
           )}
         </div>
@@ -331,6 +351,7 @@ interface CourseDetailsPanelProps {
     order: number,
   ) => void;
   onDeleteExercise: (exerciseId: number) => void;
+  onImportDone: () => Promise<void>;
 }
 
 function CourseDetailsPanel({
@@ -339,6 +360,7 @@ function CourseDetailsPanel({
   onDeleteModule,
   onAddExercise,
   onDeleteExercise,
+  onImportDone,
 }: CourseDetailsPanelProps) {
   const [moduleName, setModuleName] = useState('');
   const [moduleOrder, setModuleOrder] = useState(course.modules.length + 1);
@@ -425,6 +447,7 @@ function CourseDetailsPanel({
               onAddExercise(m.id, name, repo, classroom, order)
             }
             onDeleteExercise={onDeleteExercise}
+            onImportDone={onImportDone}
           />
         ))}
     </div>
@@ -437,18 +460,103 @@ interface ModuleBlockProps {
   onDeleteModule: () => void;
   onAddExercise: (name: string, repoPrefix: string, classroomUrl: string, order: number) => void;
   onDeleteExercise: (exerciseId: number) => void;
+  onImportDone: () => Promise<void>;
 }
 
 function ModuleBlock({
   module: m,
+  courseId,
   onDeleteModule,
   onAddExercise,
   onDeleteExercise,
+  onImportDone,
 }: ModuleBlockProps) {
   const [exName, setExName] = useState('');
   const [exRepo, setExRepo] = useState('');
   const [exClassroom, setExClassroom] = useState('');
   const [exOrder, setExOrder] = useState(m.exercises.length + 1);
+
+  // Classroom import state
+  const [showImport, setShowImport] = useState(false);
+  const [classrooms, setClassrooms] = useState<ClassroomItem[]>([]);
+  const [selectedClassroom, setSelectedClassroom] = useState<number | null>(null);
+  const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
+  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
+  const [importLoading, setImportLoading] = useState(false);
+  const [importMsg, setImportMsg] = useState('');
+
+  const loadClassrooms = async () => {
+    setShowImport(true);
+    setImportMsg('');
+    const res = await fetch('/api/courses/classroom/classrooms', { credentials: 'same-origin' });
+    if (res.ok) {
+      const body = await res.json();
+      setClassrooms(body.data);
+      if (body.data.length === 0) setImportMsg('Nem található GitHub Classroom.');
+    } else {
+      const d = await res.json();
+      setImportMsg(d.detail || 'Hiba a Classroomok lekérdezésekor.');
+    }
+  };
+
+  const loadAssignments = async (classroomId: number) => {
+    setSelectedClassroom(classroomId);
+    setAssignments([]);
+    setSelectedSlugs(new Set());
+    const res = await fetch(`/api/courses/classroom/classrooms/${classroomId}/assignments`, {
+      credentials: 'same-origin',
+    });
+    if (res.ok) {
+      const body = await res.json();
+      setAssignments(body.data);
+      if (body.data.length === 0) setImportMsg('Nincsenek feladatok ebben a Classroomban.');
+      else setImportMsg('');
+    } else {
+      setImportMsg('Hiba a feladatok lekérdezésekor.');
+    }
+  };
+
+  const toggleAssignment = (slug: string) => {
+    setSelectedSlugs((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  };
+
+  const handleImport = async () => {
+    const toImport = assignments.filter((a) => selectedSlugs.has(a.slug));
+    if (toImport.length === 0) return;
+    setImportLoading(true);
+    const res = await fetch(`/api/courses/${courseId}/modules/${m.id}/import-classroom`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        exercises: toImport.map((a) => ({
+          title: a.title,
+          slug: a.slug,
+          invite_link: a.invite_link,
+        })),
+      }),
+    });
+    setImportLoading(false);
+    if (res.ok) {
+      const result = await res.json();
+      const parts: string[] = [];
+      if (result.imported.length) parts.push(`Importálva: ${result.imported.length}`);
+      if (result.skipped.length) parts.push(`Kihagyva (már létezik): ${result.skipped.length}`);
+      setImportMsg(parts.join(' | '));
+      setSelectedSlugs(new Set());
+      await onImportDone();
+      // Refresh assignment list to update already_imported flags
+      if (selectedClassroom) await loadAssignments(selectedClassroom);
+    } else {
+      const d = await res.json();
+      setImportMsg(d.detail || 'Import hiba.');
+    }
+  };
 
   return (
     <div style={{ background: 'var(--color-bg)', padding: 16, borderRadius: 6, marginBottom: 12 }}>
@@ -463,20 +571,32 @@ function ModuleBlock({
         <h4>
           {m.order}. {m.name}
         </h4>
-        <button
-          onClick={onDeleteModule}
-          style={{
-            background: '#e74c3c',
-            color: '#fff',
-            border: 'none',
-            padding: '4px 10px',
-            borderRadius: 4,
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-          }}
-        >
-          Modul törlése
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            onClick={loadClassrooms}
+            className="btn btn-secondary"
+            style={{
+              padding: '4px 10px',
+              fontSize: '0.8rem',
+            }}
+          >
+            📥 Import from Classroom
+          </button>
+          <button
+            onClick={onDeleteModule}
+            style={{
+              background: '#e74c3c',
+              color: '#fff',
+              border: 'none',
+              padding: '4px 10px',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+            }}
+          >
+            Modul törlése
+          </button>
+        </div>
       </div>
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {m.exercises
@@ -525,6 +645,188 @@ function ModuleBlock({
             </li>
           ))}
       </ul>
+      {showImport && (
+        <div
+          style={{
+            background: 'var(--color-bg-surface, #f8f9fa)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 6,
+            padding: 16,
+            marginTop: 12,
+            marginBottom: 12,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 12,
+            }}
+          >
+            <h5 style={{ margin: 0 }}>📥 Import from GitHub Classroom</h5>
+            <button
+              onClick={() => {
+                setShowImport(false);
+                setClassrooms([]);
+                setAssignments([]);
+                setSelectedClassroom(null);
+                setImportMsg('');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1rem',
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {classrooms.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '0.8rem',
+                  color: 'var(--color-text-light)',
+                  marginBottom: 4,
+                }}
+              >
+                Classroom kiválasztása
+              </label>
+              <select
+                value={selectedClassroom ?? ''}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  if (val) loadAssignments(val);
+                }}
+                style={{
+                  padding: '6px 10px',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 4,
+                  fontSize: '0.9rem',
+                  minWidth: 250,
+                }}
+              >
+                <option value="">-- Válassz --</option>
+                {classrooms.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {assignments.length > 0 && (
+            <div>
+              <div
+                style={{
+                  marginBottom: 8,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span style={{ fontSize: '0.85rem', color: 'var(--color-text-light)' }}>
+                  {assignments.filter((a) => !a.already_imported).length} importálható feladat
+                </span>
+                <button
+                  onClick={() => {
+                    const importable = assignments
+                      .filter((a) => !a.already_imported)
+                      .map((a) => a.slug);
+                    setSelectedSlugs(new Set(importable));
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--color-primary)',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  Összes kijelölése
+                </button>
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, maxHeight: 250, overflowY: 'auto' }}>
+                {assignments.map((a) => (
+                  <li
+                    key={a.id}
+                    style={{
+                      padding: '6px 8px',
+                      borderBottom: '1px solid var(--color-border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      opacity: a.already_imported ? 0.5 : 1,
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedSlugs.has(a.slug)}
+                      disabled={a.already_imported}
+                      onChange={() => toggleAssignment(a.slug)}
+                    />
+                    <span style={{ flex: 1 }}>
+                      <strong>{a.title}</strong>
+                      <code
+                        style={{
+                          fontSize: '0.75rem',
+                          background: '#eee',
+                          padding: '1px 5px',
+                          borderRadius: 3,
+                          marginLeft: 6,
+                        }}
+                      >
+                        {a.slug}
+                      </code>
+                      {a.already_imported && (
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--color-success, green)',
+                            marginLeft: 6,
+                          }}
+                        >
+                          ✓ már importálva
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={handleImport}
+                disabled={selectedSlugs.size === 0 || importLoading}
+                className="btn btn-primary"
+                style={{ marginTop: 10, padding: '6px 16px', fontSize: '0.85rem' }}
+              >
+                {importLoading
+                  ? 'Importálás...'
+                  : `Kijelöltek importálása (${selectedSlugs.size})`}
+              </button>
+            </div>
+          )}
+
+          {importMsg && (
+            <p
+              style={{
+                marginTop: 8,
+                fontSize: '0.85rem',
+                color: importMsg.includes('Importálva')
+                  ? 'var(--color-success, green)'
+                  : 'var(--color-text-light)',
+              }}
+            >
+              {importMsg}
+            </p>
+          )}
+        </div>
+      )}
       <form
         onSubmit={(e) => {
           e.preventDefault();

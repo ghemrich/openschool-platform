@@ -3,9 +3,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, joinedload
 
 from app.auth.dependencies import get_current_user, require_role
+from app.config import settings
 from app.database import get_db
 from app.models.course import Course, Enrollment, Exercise, Module
 from app.models.user import User, UserRole
+from app.services.classroom import list_assignments, list_classrooms
 from app.services.discord import notify_enrollment
 from app.services.progress import count_progress
 
@@ -162,6 +164,101 @@ def add_exercise(
     db.commit()
     db.refresh(exercise)
     return {"id": exercise.id, "name": exercise.name}
+
+
+# --- GitHub Classroom import ---
+
+
+class ImportExercise(BaseModel):
+    title: str
+    slug: str
+    invite_link: str
+
+
+class ImportRequest(BaseModel):
+    exercises: list[ImportExercise]
+
+
+@router.get("/classroom/classrooms")
+async def get_classrooms(
+    _admin: User = Depends(require_role(UserRole.admin)),
+):
+    """List GitHub Classrooms available to the org admin token."""
+    token = settings.github_org_admin_token
+    if not token:
+        raise HTTPException(status_code=400, detail="GITHUB_ORG_ADMIN_TOKEN is not configured")
+    classrooms = await list_classrooms(token)
+    return {"data": [{"id": c.id, "name": c.name} for c in classrooms]}
+
+
+@router.get("/classroom/classrooms/{classroom_id}/assignments")
+async def get_classroom_assignments(
+    classroom_id: int,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_role(UserRole.admin)),
+):
+    """List assignments in a GitHub Classroom, marking which are already imported."""
+    token = settings.github_org_admin_token
+    if not token:
+        raise HTTPException(status_code=400, detail="GITHUB_ORG_ADMIN_TOKEN is not configured")
+    assignments = await list_assignments(token, classroom_id)
+
+    # Find existing exercises by repo_prefix to mark already-imported ones
+    existing_prefixes = {e.repo_prefix for e in db.query(Exercise.repo_prefix).all() if e.repo_prefix}
+
+    return {
+        "data": [
+            {
+                "id": a.id,
+                "title": a.title,
+                "slug": a.slug,
+                "invite_link": a.invite_link,
+                "already_imported": a.slug in existing_prefixes,
+            }
+            for a in assignments
+        ]
+    }
+
+
+@router.post("/{course_id}/modules/{module_id}/import-classroom", status_code=201)
+def import_classroom_exercises(
+    course_id: int,
+    module_id: int,
+    data: ImportRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_role(UserRole.admin)),
+):
+    """Import GitHub Classroom assignments as exercises into a module."""
+    module = db.query(Module).filter(Module.id == module_id, Module.course_id == course_id).first()
+    if not module:
+        raise HTTPException(status_code=404, detail="Module not found")
+
+    # Get the current max order in the module
+    max_order = max((e.order for e in module.exercises), default=0)
+
+    imported = []
+    skipped = []
+    for ex in data.exercises:
+        # Skip if an exercise with this repo_prefix already exists in ANY module
+        existing = db.query(Exercise).filter(Exercise.repo_prefix == ex.slug).first()
+        if existing:
+            skipped.append(ex.title)
+            continue
+
+        max_order += 1
+        exercise = Exercise(
+            module_id=module_id,
+            name=ex.title,
+            repo_prefix=ex.slug,
+            classroom_url=ex.invite_link,
+            order=max_order,
+            required=True,
+        )
+        db.add(exercise)
+        imported.append(ex.title)
+
+    db.commit()
+    return {"imported": imported, "skipped": skipped}
 
 
 # --- Enrollment ---

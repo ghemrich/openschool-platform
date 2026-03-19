@@ -181,15 +181,29 @@ Webhook nélkül: a tanuló a dashboardon a **„Haladás szinkronizálása"** g
 |-------|-----|-----|
 | Kurzus/modul létrehozás | Admin | OpenSchool |
 | Assignment létrehozás | Mentor | GitHub Classroom |
-| Feladat hozzárendelés (`repo_prefix`) | Admin | OpenSchool |
+| Feladat hozzárendelés (`repo_prefix`) | Admin | OpenSchool (manuális vagy Classroom import) |
 | Beiratkozás | Tanuló | OpenSchool |
 | Assignment elfogadás | Tanuló | GitHub Classroom |
 | CI futtatás | Automatikus | GitHub Actions |
 | Haladás frissítés | Automatikus (webhook) / manuális (sync) | OpenSchool |
 
+### Classroom Import funkció
+
+Az admin panelen a moduloknál elérhető a **„📥 Import from Classroom"** gomb, amely a GitHub Classroom API-n keresztül lekérdezi az elérhető assignment-eket és automatikusan létrehozza a megfelelő feladatokat:
+
+1. Admin a modul mellett kattint az **Import from Classroom** gombra
+2. A rendszer lekérdezi az elérhető GitHub Classroom-okat (`GET /classrooms`)
+3. Admin kiválasztja a Classroom-ot, majd a listából kijelöli az importálandó assignment-eket
+4. Az import automatikusan beállítja a `repo_prefix` (assignment slug) és `classroom_url` (invite link) mezőket
+5. Már importált assignment-ek szürkén jelennek meg
+
+> **Megjegyzés:** A Classroom API csak olvasási jogot biztosít — assignment létrehozás továbbra is a GitHub Classroom webes felületén történik.
+
+**Szükséges:** `GITHUB_ORG_ADMIN_TOKEN` (PAT `admin:org` + `repo` scope-pal)
+
 ### Ismert korlátok
 
-1. Nincs automatikus assignment szinkronizálás Classroom → OpenSchool
+1. ~~Nincs automatikus assignment szinkronizálás Classroom → OpenSchool~~ → **Megoldva: Classroom Import funkcióval**
 2. Nincs automatikus beiratkozás (külön kell a két rendszerben)
 3. A `repo_prefix`-nek pontosan egyeznie kell
 4. Egy org támogatott (`GITHUB_ORG`)

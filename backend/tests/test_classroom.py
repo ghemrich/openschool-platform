@@ -1,12 +1,14 @@
 import hashlib
 import hmac
 import json
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from app.auth.jwt import create_access_token
 from app.models.course import Course, Enrollment, Exercise, Module, Progress, ProgressStatus
 from app.models.user import User, UserRole
+from app.services.classroom import AssignmentInfo, ClassroomInfo
 
 TEST_WEBHOOK_SECRET = "test-webhook-secret"
 
@@ -229,3 +231,99 @@ def test_webhook_no_duplicate_update(client, db_session, student, course_with_ex
     response = _signed_webhook_post(client, payload)
     assert response.status_code == 200
     assert response.json()["updated"] is False
+
+
+# --- Classroom import API ---
+
+
+MOCK_CLASSROOMS = [
+    ClassroomInfo(id=1, name="Python Course", url="https://classroom.github.com/classrooms/1"),
+    ClassroomInfo(id=2, name="Web Dev", url="https://classroom.github.com/classrooms/2"),
+]
+
+MOCK_ASSIGNMENTS = [
+    AssignmentInfo(id=10, title="Hello World", slug="het01-hello", invite_link="https://classroom.github.com/a/abc123", classroom_id=1),
+    AssignmentInfo(id=11, title="Loops", slug="het03-loops", invite_link="https://classroom.github.com/a/def456", classroom_id=1),
+]
+
+
+def test_list_classrooms_requires_admin(client, student):
+    token = create_access_token(student.id)
+    response = client.get("/api/courses/classroom/classrooms", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 403
+
+
+@patch("app.routers.courses.list_classrooms", new_callable=AsyncMock, return_value=MOCK_CLASSROOMS)
+def test_list_classrooms(mock_lc, client, admin, monkeypatch):
+    monkeypatch.setattr("app.config.settings.github_org_admin_token", "test-token")
+    token = create_access_token(admin.id)
+    response = client.get("/api/courses/classroom/classrooms", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()["data"]
+    assert len(data) == 2
+    assert data[0]["name"] == "Python Course"
+    mock_lc.assert_called_once_with("test-token")
+
+
+@patch("app.routers.courses.list_assignments", new_callable=AsyncMock, return_value=MOCK_ASSIGNMENTS)
+def test_list_assignments_marks_imported(mock_la, client, admin, db_session, course_with_exercises, monkeypatch):
+    monkeypatch.setattr("app.config.settings.github_org_admin_token", "test-token")
+    token = create_access_token(admin.id)
+    response = client.get("/api/courses/classroom/classrooms/1/assignments", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()["data"]
+    assert len(data) == 2
+    # "het01-hello" already exists in the course_with_exercises fixture
+    assert data[0]["already_imported"] is True
+    assert data[1]["already_imported"] is False
+
+
+def test_import_exercises(client, admin, db_session):
+    course = Course(name="Import Test", description="")
+    db_session.add(course)
+    db_session.flush()
+    module = Module(course_id=course.id, name="Mod 1", order=1)
+    db_session.add(module)
+    db_session.commit()
+
+    token = create_access_token(admin.id)
+    response = client.post(
+        f"/api/courses/{course.id}/modules/{module.id}/import-classroom",
+        json={
+            "exercises": [
+                {"title": "Loops", "slug": "het03-loops", "invite_link": "https://classroom.github.com/a/def456"},
+                {"title": "Functions", "slug": "het04-funcs", "invite_link": "https://classroom.github.com/a/ghi789"},
+            ]
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 201
+    result = response.json()
+    assert len(result["imported"]) == 2
+    assert len(result["skipped"]) == 0
+
+    exercises = db_session.query(Exercise).filter(Exercise.module_id == module.id).order_by(Exercise.order).all()
+    assert len(exercises) == 2
+    assert exercises[0].name == "Loops"
+    assert exercises[0].repo_prefix == "het03-loops"
+    assert exercises[0].classroom_url == "https://classroom.github.com/a/def456"
+    assert exercises[1].name == "Functions"
+
+
+def test_import_skips_duplicates(client, admin, db_session, course_with_exercises):
+    module = db_session.query(Module).filter(Module.course_id == course_with_exercises.id).first()
+    token = create_access_token(admin.id)
+    response = client.post(
+        f"/api/courses/{course_with_exercises.id}/modules/{module.id}/import-classroom",
+        json={
+            "exercises": [
+                {"title": "Hello World Again", "slug": "het01-hello", "invite_link": "https://classroom.github.com/a/dup"},
+                {"title": "New Exercise", "slug": "het05-new", "invite_link": "https://classroom.github.com/a/new123"},
+            ]
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 201
+    result = response.json()
+    assert result["imported"] == ["New Exercise"]
+    assert result["skipped"] == ["Hello World Again"]
