@@ -1,10 +1,13 @@
 import logging
+from pathlib import Path
 
 import qrcode
 from fpdf import FPDF
 from qrcode.constants import ERROR_CORRECT_M
 
 logger = logging.getLogger(__name__)
+
+DEJAVU_DIR = Path("/usr/share/fonts/truetype/dejavu")
 
 
 def _draw_qr(pdf: FPDF, url: str, x: float, y: float, size: float) -> None:
@@ -39,6 +42,17 @@ def generate_certificate_pdf(
 ) -> bytes:
     """Generate a certificate PDF using fpdf2."""
     pdf = FPDF(orientation="L", unit="mm", format="A4")
+
+    # Register DejaVu Sans (full Unicode support for Hungarian characters)
+    font_regular = DEJAVU_DIR / "DejaVuSans.ttf"
+    font_bold = DEJAVU_DIR / "DejaVuSans-Bold.ttf"
+    if font_regular.is_file():
+        pdf.add_font("DejaVu", "", str(font_regular), uni=True)
+        pdf.add_font("DejaVu", "B", str(font_bold), uni=True)
+        font = "DejaVu"
+    else:
+        font = "Helvetica"
+
     pdf.add_page()
     pdf.set_auto_page_break(auto=False)
 
@@ -50,37 +64,37 @@ def generate_certificate_pdf(
     pdf.rect(13, 13, 271, 184)
 
     # Title
-    pdf.set_font("Helvetica", "B", 36)
+    pdf.set_font(font, "B", 36)
     pdf.set_text_color(44, 62, 80)
     pdf.set_y(30)
     pdf.cell(0, 15, "OpenSchool", ln=True, align="C")
 
-    pdf.set_font("Helvetica", "", 16)
+    pdf.set_font(font, "", 16)
     pdf.set_text_color(127, 140, 141)
     pdf.cell(0, 10, "Tanúsítvány a tanfolyam elvégzéséről", ln=True, align="C")
 
     # Recipient
     pdf.ln(15)
-    pdf.set_font("Helvetica", "", 14)
+    pdf.set_font(font, "", 14)
     pdf.set_text_color(100, 100, 100)
     pdf.cell(0, 10, "Ez igazolja, hogy", ln=True, align="C")
 
-    pdf.set_font("Helvetica", "B", 28)
+    pdf.set_font(font, "B", 28)
     pdf.set_text_color(231, 76, 60)
     pdf.cell(0, 15, name, ln=True, align="C")
 
     # Course
-    pdf.set_font("Helvetica", "", 14)
+    pdf.set_font(font, "", 14)
     pdf.set_text_color(100, 100, 100)
     pdf.cell(0, 10, "sikeresen elvégezte a következő kurzust", ln=True, align="C")
 
-    pdf.set_font("Helvetica", "B", 22)
+    pdf.set_font(font, "B", 22)
     pdf.set_text_color(44, 62, 80)
     pdf.cell(0, 12, course_name, ln=True, align="C")
 
     # Date
     pdf.ln(8)
-    pdf.set_font("Helvetica", "", 12)
+    pdf.set_font(font, "", 12)
     pdf.set_text_color(127, 140, 141)
     pdf.cell(0, 8, f"Kiadva: {issued_date}", ln=True, align="C")
 
@@ -89,7 +103,7 @@ def generate_certificate_pdf(
 
     # Certificate ID & verify URL
     pdf.set_y(182)
-    pdf.set_font("Helvetica", "", 9)
+    pdf.set_font(font, "", 9)
     pdf.set_text_color(189, 195, 199)
     pdf.cell(0, 5, f"Tanúsítvány azonosító: {cert_id}", ln=True, align="C")
     pdf.cell(0, 5, f"Ellenőrzés: {verify_url}", ln=True, align="C")
