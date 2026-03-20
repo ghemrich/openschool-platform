@@ -423,3 +423,37 @@ def test_import_skips_duplicates(client, admin, db_session, course_with_exercise
     result = response.json()
     assert result["imported"] == ["New Exercise"]
     assert result["skipped"] == ["Hello World Again"]
+    assert result["updated"] == []
+
+
+def test_reimport_backfills_teacher_url(client, admin, db_session, course_with_exercises):
+    """Re-importing with assignment_id/classroom_id backfills classroom_teacher_url."""
+    module = db_session.query(Module).filter(Module.course_id == course_with_exercises.id).first()
+    # Verify existing exercises have no teacher URL
+    ex = db_session.query(Exercise).filter(Exercise.repo_prefix == "het01-hello").first()
+    assert ex.classroom_teacher_url is None
+
+    token = create_access_token(admin.id)
+    response = client.post(
+        f"/api/courses/{course_with_exercises.id}/modules/{module.id}/import-classroom",
+        json={
+            "exercises": [
+                {
+                    "title": "Hello World",
+                    "slug": "het01-hello",
+                    "invite_link": "https://classroom.github.com/a/abc123",
+                    "assignment_id": 10,
+                    "classroom_id": 1,
+                },
+            ]
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 201
+    result = response.json()
+    assert result["imported"] == []
+    assert result["updated"] == ["Hello World"]
+    assert result["skipped"] == []
+
+    db_session.refresh(ex)
+    assert ex.classroom_teacher_url == "https://classroom.github.com/classrooms/1/assignments/10"

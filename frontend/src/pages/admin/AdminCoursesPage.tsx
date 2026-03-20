@@ -548,6 +548,7 @@ function ModuleBlock({
       const result = await res.json();
       const parts: string[] = [];
       if (result.imported.length) parts.push(`Importálva: ${result.imported.length}`);
+      if (result.updated?.length) parts.push(`Frissítve: ${result.updated.length}`);
       if (result.skipped.length) parts.push(`Kihagyva (már létezik): ${result.skipped.length}`);
       setImportMsg(parts.join(' | '));
       setSelectedSlugs(new Set());

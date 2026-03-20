@@ -240,19 +240,24 @@ def import_classroom_exercises(
 
     imported = []
     skipped = []
+    updated = []
     for ex in data.exercises:
-        # Skip if an exercise with this repo_prefix already exists in ANY module
-        existing = db.query(Exercise).filter(Exercise.repo_prefix == ex.slug).first()
-        if existing:
-            skipped.append(ex.title)
-            continue
-
-        max_order += 1
         # Build teacher-facing URL if assignment/classroom IDs are provided
         teacher_url = None
         if ex.assignment_id and ex.classroom_id:
             teacher_url = f"https://classroom.github.com/classrooms/{ex.classroom_id}/assignments/{ex.assignment_id}"
 
+        # If exercise already exists, backfill teacher URL if missing
+        existing = db.query(Exercise).filter(Exercise.repo_prefix == ex.slug).first()
+        if existing:
+            if teacher_url and not existing.classroom_teacher_url:
+                existing.classroom_teacher_url = teacher_url
+                updated.append(ex.title)
+            else:
+                skipped.append(ex.title)
+            continue
+
+        max_order += 1
         exercise = Exercise(
             module_id=module_id,
             name=ex.title,
@@ -266,7 +271,7 @@ def import_classroom_exercises(
         imported.append(ex.title)
 
     db.commit()
-    return {"imported": imported, "skipped": skipped}
+    return {"imported": imported, "skipped": skipped, "updated": updated}
 
 
 # --- Enrollment ---
