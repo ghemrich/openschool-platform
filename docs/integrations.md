@@ -143,7 +143,7 @@ A `GITHUB_ORG_ADMIN_TOKEN` kötelező: ezt használja a rendszer a CI státusz l
 |------|--------|-------|
 | `repo_prefix` | **Pontosan** a Classroom assignment prefix | `python-hello-world` |
 | `classroom_url` | Assignment meghívó link (tanulóknak) | `https://classroom.github.com/a/xYz123` |
-| `classroom_teacher_url` | Teacher dashboard URL (importkor automatikus) | `https://classroom.github.com/classrooms/{id}/assignments/{id}` |
+| `classroom_teacher_url` | Teacher dashboard URL (importkor automatikus) | `{classroom_url}/assignments/{slug}` (pl. `https://classroom.github.com/classrooms/12345-python-alapok/assignments/het01-hello`) |
 
 ### A `repo_prefix` a kulcs
 

@@ -197,7 +197,7 @@ Elérhető GitHub Classroom-ok listázása.
 Assignment-ek listázása (már importált jelölésével).
 
 ```json
-[{"id": 101, "title": "Hello World", "slug": "het01-hello", "invite_link": "https://classroom.github.com/a/abc123", "already_imported": false}]
+[{"id": 101, "title": "Hello World", "slug": "het01-hello", "invite_link": "https://classroom.github.com/a/abc123", "classroom_url": "https://classroom.github.com/classrooms/12345-python-alapok", "already_imported": false}]
 ```
 
 ### `POST /api/courses/{course_id}/modules/{module_id}/import-classroom` *(admin)*
@@ -211,8 +211,7 @@ GitHub Classroom assignment-ek importálása. `201`.
       "title": "Hello World",
       "slug": "het01-hello",
       "invite_link": "https://classroom.github.com/a/abc123",
-      "assignment_id": 101,
-      "classroom_id": 12345
+      "classroom_url": "https://classroom.github.com/classrooms/12345-python-alapok"
     }
   ]
 }
@@ -223,8 +222,7 @@ GitHub Classroom assignment-ek importálása. `201`.
 | `title` | string | igen | Assignment neve |
 | `slug` | string | igen | Repo prefix |
 | `invite_link` | string | igen | Tanulói meghívó link |
-| `assignment_id` | int | nem | GitHub assignment ID (teacher URL-hez) |
-| `classroom_id` | int | nem | GitHub classroom ID (teacher URL-hez) |
+| `classroom_url` | string | nem | GitHub Classroom web URL (teacher URL építéshez) |
 
 Válasz:
 
@@ -270,7 +268,7 @@ Diák feladatonkénti haladása GitHub Classroom linkekkel.
   "modules": [{
     "module_id": 1, "module_name": "Változók és típusok",
     "exercises": [
-      {"exercise_id": 1, "name": "Hello World", "status": "completed", "classroom_url": "https://classroom.github.com/classrooms/12345/assignments/101"},
+      {"exercise_id": 1, "name": "Hello World", "status": "completed", "classroom_url": "https://classroom.github.com/classrooms/12345-python-alapok/assignments/het01-hello"},
       {"exercise_id": 2, "name": "Típuskonverzió", "status": "not_started", "classroom_url": null}
     ]
   }]
