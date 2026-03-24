@@ -93,23 +93,47 @@ export default function CourseDetailPage() {
         </>
       )}
 
-      {enrolled && course.modules && course.modules.some((m) => m.exercises.some((e) => e.classroom_url)) && (
-        <div className="card" style={{ background: '#f0f7ff', border: '1px solid #b3d4fc', padding: '16px 20px', margin: '20px 0' }}>
-          <strong>ℹ️ GitHub Classroom – mielőtt elkezded</strong>
-          <ol style={{ margin: '8px 0 0', paddingLeft: '20px', lineHeight: '1.7' }}>
-            <li>
-              <strong>Fogadd el a GitHub szervezeti meghívót!</strong> Bejelentkezéskor automatikusan kapsz meghívót.
-              Ellenőrizd: <a href="https://github.com/settings/organizations" target="_blank" rel="noopener noreferrer">github.com/settings/organizations</a> –
-              ha a meghívó „pending" állapotban van, fogadd el.
-            </li>
-            <li>Győződj meg róla, hogy a böngésződben <strong>ugyanazzal a GitHub fiókkal</strong> vagy bejelentkezve, amivel a platformra regisztráltál.</li>
-            <li>Ezután kattints a 📎 ikonra a feladatoknál, és fogadd el az assignment-et a GitHub Classroom-ban.</li>
-          </ol>
-          <p style={{ margin: '8px 0 0', fontSize: '0.9em', color: '#555' }}>
-            Ha „Repository Access Issue" hibát kapsz, az általában azt jelenti, hogy a szervezeti meghívó nincs elfogadva.
-          </p>
-        </div>
-      )}
+      {enrolled &&
+        course.modules &&
+        course.modules.some((m) => m.exercises.some((e) => e.classroom_url)) && (
+          <div
+            className="card"
+            style={{
+              background: '#f0f7ff',
+              border: '1px solid #b3d4fc',
+              padding: '16px 20px',
+              margin: '20px 0',
+            }}
+          >
+            <strong>ℹ️ GitHub Classroom – mielőtt elkezded</strong>
+            <ol style={{ margin: '8px 0 0', paddingLeft: '20px', lineHeight: '1.7' }}>
+              <li>
+                <strong>Fogadd el a GitHub szervezeti meghívót!</strong> Bejelentkezéskor
+                automatikusan kapsz meghívót. Ellenőrizd:{' '}
+                <a
+                  href="https://github.com/settings/organizations"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  github.com/settings/organizations
+                </a>{' '}
+                – ha a meghívó „pending" állapotban van, fogadd el.
+              </li>
+              <li>
+                Győződj meg róla, hogy a böngésződben <strong>ugyanazzal a GitHub fiókkal</strong>{' '}
+                vagy bejelentkezve, amivel a platformra regisztráltál.
+              </li>
+              <li>
+                Ezután kattints a 📎 ikonra a feladatoknál, és fogadd el az assignment-et a GitHub
+                Classroom-ban.
+              </li>
+            </ol>
+            <p style={{ margin: '8px 0 0', fontSize: '0.9em', color: '#555' }}>
+              Ha „Repository Access Issue" hibát kapsz, az általában azt jelenti, hogy a szervezeti
+              meghívó nincs elfogadva.
+            </p>
+          </div>
+        )}
 
       {course.modules && course.modules.length > 0 && (
         <>
